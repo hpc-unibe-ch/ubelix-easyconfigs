@@ -1,0 +1,35 @@
+##
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+#
+# Author:    Michael Rolli <michael.rolli@id.unibe.ch>
+##
+easyblock = 'Tarball'
+
+name = 'cuDNN'
+version = '7.1.4'
+cuda_version = '9.2.88'
+
+cuda_version_major_minor = '.'.join(cuda_version.split('.')[:2])
+
+versionsuffix = '-CUDA-%s' % cuda_version
+
+homepage = 'https://developer.nvidia.com/cudnn'
+description = """The NVIDIA CUDA Deep Neural Network library (cuDNN) is a GPU-accelerated library of primitives for
+    deep neural networks."""
+
+toolchain = {'name': 'dummy', 'version': 'dummy'}
+
+# Nvidia developer registration required.
+# Download link: https://developer.nvidia.com/rdp/cudnn-download
+# Download as cudnn-9.2-linux-x64-v7.1.tgz, rename to cudnn-9.0-linux-x64-v<VERSION>.tgz
+sources = ['%%(namelower)s-%s-linux-x64-v%%(version)s.tgz' % cuda_version_major_minor]
+checksums = ['f875340f812b942408098e4c9807cb4f8bdaea0db7c48613acece10c7c827101']
+
+dependencies = [('CUDA', cuda_version)]
+
+sanity_check_paths = {
+    'files': ['include/cudnn.h', 'lib64/libcudnn_static.a'],
+    'dirs': ['include', 'lib64'],
+}
+
+moduleclass = 'numlib'
