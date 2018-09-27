@@ -1,0 +1,30 @@
+##
+# This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
+##
+easyblock = 'ConfigureMake'
+
+name = 'UDUNITS'
+version = '2.2.26'
+
+homepage = 'http://www.unidata.ucar.edu/software/udunits/'
+description = """UDUNITS supports conversion of unit specifications between formatted and binary forms,
+ arithmetic manipulation of units, and conversion of values between compatible scales of measurement."""
+
+toolchain = {'name': 'foss', 'version': '2018a'}
+toolchainopts = {'pic': True}
+
+source_urls = ['ftp://ftp.unidata.ucar.edu/pub/udunits']
+sources = [SOURCELOWER_TAR_GZ]
+checksums = ['368f4869c9c7d50d2920fa8c58654124e9ed0d8d2a8c714a9d7fdadc08c7356d']
+
+dependencies = [('expat', '2.2.5')]
+
+sanity_check_paths = {
+    'files': ['bin/udunits2', 'include/converter.h', 'include/udunits2.h', 'include/udunits.h',
+              'lib/libudunits2.a', 'lib/libudunits2.%s' % SHLIB_EXT],
+    'dirs': ['share'],
+}
+
+parallel = 1
+
+moduleclass = 'phys'
