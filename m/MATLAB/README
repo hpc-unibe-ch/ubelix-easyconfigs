@@ -1,7 +1,8 @@
 Versions and Java Compatibility
 
-9.1.0.441655 (R2016b) => Java 1.7.0_60-b19
+9.5.0.942161 (R2018b) => Java 1.8.0_152-b16 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
 9.3.0.713579 (R2017b) => Java 1.8.0_121-b13 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+9.1.0.441655 (R2016b) => Java 1.7.0_60-b19
 
 Adjust the 'license_server', 'license_server_port' and 'key' values in the example easyconfig file.
 
