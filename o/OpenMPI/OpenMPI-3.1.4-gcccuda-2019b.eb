@@ -22,6 +22,6 @@ dependencies = [
 
 # to enable SLURM integration (site-specific)
 # configopts = '--with-slurm --with-pmi=/usr/include/slurm --with-pmi-libdir=/usr'
-configopts = '--with-slurm --with-pmix'
+configopts = '--with-slurm --with-pmi'
 
 moduleclass = 'mpi'
