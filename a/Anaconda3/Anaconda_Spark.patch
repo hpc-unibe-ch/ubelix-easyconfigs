@@ -1,0 +1,15 @@
+--- spark_kernel.json  1970-01-01 12:00:00.000000000 +1200
++++ spark_kernel.json 2019-08-14 16:04:21.537813000 +1200
+@@ -0,0 +1,12 @@
++{
++  "display_name": "PySpark",
++  "language": "python",
++  "argv": [ "python", "-m", "ipykernel", "-f", "{connection_file}" ],
++  "env": {
++    "SPARK_HOME": "$EBROOTSPARK",
++    "PYSPARK_PYTHON": "python3",
++    "PYTHONPATH": "$EBROOTSPARK/python/:$EBROOTSPARK/python/lib/py4j-0.9-src.zip",
++    "PYTHONSTARTUP": "$EBROOTSPARK/python/pyspark/shell.py",
++    "PYSPARK_SUBMIT_ARGS": "--master yarn-client pyspark-shell"
++  }
++}

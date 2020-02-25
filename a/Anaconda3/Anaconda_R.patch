@@ -1,0 +1,9 @@
+--- r_kernel.json   1970-01-01 12:00:00.000000000 +1200
++++ r_kernel.json   2019-08-12 14:45:42.071209000 +1200
+@@ -0,0 +1,5 @@
++{
++ "argv": ["R", "--slave", "-e", "IRkernel::main()", "--args", "{connection_file}"],
++ "display_name":"R",
++ "language":"R"
++}
+
