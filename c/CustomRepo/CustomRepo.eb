@@ -1,0 +1,93 @@
+# author: mandes.schoenherr@unibe.ch
+#easyblock = 'Binary'
+easyblock = 'Tarball'
+
+name = 'CustomRepo'
+version = 'generic'
+
+hidden = True
+
+homepage = ''
+description = """Configuration module setting environment variables to install software using EasyBuild in user/group/institute space.
+For installation the EasyBuild module needs to be loaded before the module CustomRepo.
+For using the custom repository only this module needs to be loaded."""
+
+toolchain = SYSTEM
+sources = ['CustomRepo.tar.gz']
+checksums = ['67185299ff3ab6da28c5952cfffe75ed38fc19c0bc70b2f0277436c7c11f5d91']
+
+# Nothing to be done here
+#skipsteps = ['source', 'configure', 'build', 'test', 'install']
+
+#builddependencies = [('EasyBuild', '4.0.1')]
+
+postinstallcmds = ['cd %(installdir)s/../../../modules/all/%(name)s/; ln -s .generic.lua user.lua; ln -s .generic.lua institute.lua; ln -s .generic.lua project.lua;']
+
+modextrapaths = {'PATH': ''}
+
+modluafooter = """
+require 'os'
+
+local name = myModuleName()
+local version = myModuleVersion()
+local arch_typ = subprocess("gcc -march=native -Q --help=target | grep march | awk '{print $2}'")
+arch_typ = string.gsub(arch_typ, '\\\n', '')
+
+-- global easybuild resources
+local global_base = '/software.el7'
+local EB_base = os.getenv('EBROOTEASYBUILD')
+
+-- get the base directory, depending on the module version
+-- assume that $HOME has not been clobbered or modified
+if version == 'user' then
+      base = pathJoin(os.getenv('HOME'))
+elseif version == 'institute' then
+      base = pathJoin(os.getenv('HOME'), '..', 'share')
+elseif version == 'project' then
+      if not os.getenv("PROJECT_ID") then
+            LmodError("You need to specify the project ID in environment variable PROJECT_ID before loading this module, e.g. export PROJECT_ID=<project_name>")
+      end
+      base = pathJoin('/storage/research/', os.getenv('PROJECT_ID'), 'share')
+elseif version == '.generic' then
+      base = global_base
+else
+      LmodError('Error the module ' .. name .. '/' .. version .. ' is not defined well, please contact support.')
+end
+
+-- distinguish different software stacks
+if arch_typ == 'corei7-avx' then
+      arch = 'sandybridge.el7'
+elseif arch_typ == 'core-avx-i' then
+      arch = 'ivybridge.el7'
+elseif arch_typ == 'core-avx2' then
+      arch = 'broadwell.el7'
+else
+      LmodError('Error the module ' .. name .. '/' .. version ..' has no definition for node architecture ' .. arch_typ .. ', please contact support. ')
+end
+
+-- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
+-- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
+append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
+append_path('EASYBUILD_ROBOT_PATHS', pathJoin(EB_base, 'easybuild', 'easyconfigs'))
+append_path('EASYBUILD_ROBOT_PATHS', pathJoin(global_base, 'ebfiles_repo'))
+
+-- for custom architecture dependent eepo
+setenv('EASYBUILD_PREFIX', pathJoin(base, 'easybuild', arch))
+prepend_path('EASYBUILD_SOURCEPATH', pathJoin(base, 'easybuild', 'sources'))
+prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(base, 'easybuild', 'easybuild-resources', 'ebfiles_repo'))
+prepend_path('MODULEPATH', pathJoin(base, 'easybuild', arch, 'modules', 'all'))
+setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
+
+-- for custom generic repo
+prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modules', 'all'))
+"""
+
+
+
+sanity_check_paths = {
+    'files': ['eb-install-all', 'eb-install-generic'],
+    'dirs': [''],
+}
+
+moduleclass = 'base'
+
