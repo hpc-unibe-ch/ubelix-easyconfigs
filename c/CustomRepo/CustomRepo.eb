@@ -21,7 +21,7 @@ checksums = ['67185299ff3ab6da28c5952cfffe75ed38fc19c0bc70b2f0277436c7c11f5d91']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
-postinstallcmds = ['cd %(installdir)s/../../../modules/all/%(name)s/; ln -s .generic.lua user.lua; ln -s .generic.lua institute.lua; ln -s .generic.lua project.lua;']
+postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; ln -s .generic.lua user.lua; ln -s .generic.lua institute.lua; ln -s .generic.lua project.lua;']
 
 modextrapaths = {'PATH': ''}
 
@@ -72,14 +72,16 @@ append_path('EASYBUILD_ROBOT_PATHS', pathJoin(EB_base, 'easybuild', 'easyconfigs
 append_path('EASYBUILD_ROBOT_PATHS', pathJoin(global_base, 'ebfiles_repo'))
 
 -- for custom architecture dependent eepo
-setenv('EASYBUILD_PREFIX', pathJoin(base, 'easybuild', arch))
+EASYBUILD_PREFIX = pathJoin(base, 'easybuild', arch)
+setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
+setenv('EASYBUILD_INSTALLPATH_MODULES', pathJoin(EASYBUILD_PREFIX, 'modulefiles'))
 prepend_path('EASYBUILD_SOURCEPATH', pathJoin(base, 'easybuild', 'sources'))
 prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(base, 'easybuild', 'easybuild-resources', 'ebfiles_repo'))
-prepend_path('MODULEPATH', pathJoin(base, 'easybuild', arch, 'modules', 'all'))
+prepend_path('MODULEPATH', pathJoin(EASYBUILD_PREFIX, 'modulefiles', 'all'))
 setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
 
 -- for custom generic repo
-prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modules', 'all'))
+prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modulefiles', 'all'))
 """
 
 
