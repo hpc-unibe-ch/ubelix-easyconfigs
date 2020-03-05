@@ -55,11 +55,11 @@ else
 end
 
 -- distinguish different software stacks
-if arch_typ == 'corei7-avx' then
+if (arch_typ == 'corei7-avx' and arch_typ == 'sandybridge') then
       arch = 'sandybridge.el7'
-elseif arch_typ == 'core-avx-i' then
+elseif (arch_typ == 'core-avx-i' and arch_typ == 'ivybridge') then
       arch = 'ivybridge.el7'
-elseif arch_typ == 'core-avx2' then
+elseif (arch_typ == 'core-avx2' and arch_typ == 'broadwell') then
       arch = 'broadwell.el7'
 else
       LmodError('Error the module ' .. name .. '/' .. version ..' has no definition for node architecture ' .. arch_typ .. ', please contact support. ')
