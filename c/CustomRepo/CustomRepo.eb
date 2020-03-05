@@ -21,7 +21,7 @@ checksums = ['eb53696bbbe105835bddac9b7ea81d0d39008b4594a1bc57f24cb0260adabd45']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
-postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; ln -s .generic.lua user.lua; ln -s .generic.lua institute.lua; ln -s .generic.lua project.lua;']
+postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; rm user.lua institute.lua project.lua; ln -s .generic.lua user.lua; ln -s .generic.lua institute.lua; ln -s .generic.lua project.lua;']
 
 modextrapaths = {'PATH': ''}
 
