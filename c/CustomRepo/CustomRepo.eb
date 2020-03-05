@@ -45,7 +45,7 @@ elseif version == 'institute' then
       base = pathJoin(os.getenv('HOME'), '..', 'share')
 elseif version == 'project' then
       if not os.getenv("CUSTOM_REPO_PROJECT_ID") then
-            LmodError("You need to specify the project ID in environment variable CUSTOM_REPO_PROJECT_ID before loading this module, e.g. export PROJECT_ID=<project_name>")
+            LmodError("You need to specify the project ID in environment variable CUSTOM_REPO_PROJECT_ID before loading this module, e.g. export CUSTOM_REPO_PROJECT_ID=<project_name>")
       end
       base = pathJoin('/storage/research/', os.getenv('CUSTOM_REPO_PROJECT_ID'), 'share')
 elseif version == '.generic' then
