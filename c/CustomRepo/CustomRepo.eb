@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['67185299ff3ab6da28c5952cfffe75ed38fc19c0bc70b2f0277436c7c11f5d91']
+checksums = ['eb53696bbbe105835bddac9b7ea81d0d39008b4594a1bc57f24cb0260adabd45']
 
 # Nothing to be done here
 #skipsteps = ['source', 'configure', 'build', 'test', 'install']
@@ -44,10 +44,10 @@ if version == 'user' then
 elseif version == 'institute' then
       base = pathJoin(os.getenv('HOME'), '..', 'share')
 elseif version == 'project' then
-      if not os.getenv("PROJECT_ID") then
-            LmodError("You need to specify the project ID in environment variable PROJECT_ID before loading this module, e.g. export PROJECT_ID=<project_name>")
+      if not os.getenv("CUSTOM_REPO_PROJECT_ID") then
+            LmodError("You need to specify the project ID in environment variable CUSTOM_REPO_PROJECT_ID before loading this module, e.g. export PROJECT_ID=<project_name>")
       end
-      base = pathJoin('/storage/research/', os.getenv('PROJECT_ID'), 'share')
+      base = pathJoin('/storage/research/', os.getenv('CUSTOM_REPO_PROJECT_ID'), 'share')
 elseif version == '.generic' then
       base = global_base
 else
