@@ -6,7 +6,7 @@ version = 'generic'
 
 hidden = True
 
-homepage = ''
+homepage = 'https://hpc-unibe-ch.github.io/hpc-unibe-ch.github.io/user-guide/software/installing-custom-software.html'
 description = """Configuration module setting environment variables to install software 
 using EasyBuild in user/group/institute space.
 For installation the EasyBuild module needs to be loaded before the module CustomRepo.
