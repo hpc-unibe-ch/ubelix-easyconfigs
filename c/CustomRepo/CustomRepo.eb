@@ -68,7 +68,8 @@ end
 
 ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
 -- Don't warn for this and Easybuild module during eb process
-setenv('EASYBUILD_ALLOW_LOADED_MODULES', 'EasyBuild,'+name)
+modules = 'EasyBuild,' .. name
+setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
 setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
 
 -- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
