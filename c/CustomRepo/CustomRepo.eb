@@ -67,7 +67,7 @@ else
 end
 
 ebver = os.getenv('EBVERSIONEASYBUILD')
-if not ebver then
+if not ebver == nil then
     ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
     prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(ebpath, '/easybuild/easyconfigs/'))
 end
