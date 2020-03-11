@@ -66,7 +66,11 @@ else
       LmodError('Error the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' .. arch_typ .. ', please contact support. ')
 end
 
-ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
+ebver = os.getenv('EBVERSIONEASYBUILD')
+if not ebver then
+    ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
+    prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(ebpath, '/easybuild/easyconfigs/'))
+end
 -- Don't warn for this and Easybuild module during eb process
 modules = 'EasyBuild,' .. name
 setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
@@ -75,7 +79,6 @@ setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
 -- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
 -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
 append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
-prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(ebpath, '/easybuild/easyconfigs/'))
 
 
 -- for custom architecture dependent eepo
