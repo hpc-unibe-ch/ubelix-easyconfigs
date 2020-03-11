@@ -43,14 +43,14 @@ local EB_base = os.getenv('EBROOTEASYBUILD')
 if version == 'user' then
       base = pathJoin(os.getenv('HOME'))
 elseif version == 'institute' then
-      base = pathJoin(os.getenv('HOME'), '..', 'share')
+      base = pathJoin(os.getenv('HOME'), '..', 'shared')
 elseif version == 'project' then
       if not os.getenv("CUSTOM_REPO_PROJECT_ID") then
             LmodError("You need to specify the project ID in environment variable CUSTOM_REPO_PROJECT_ID before loading this module, e.g. export CUSTOM_REPO_PROJECT_ID=<project_name>")
       end
-      base = pathJoin('/storage/research/', os.getenv('CUSTOM_REPO_PROJECT_ID'), 'share')
+      base = pathJoin('/storage/research/', os.getenv('CUSTOM_REPO_PROJECT_ID'), 'shared')
 elseif version == '.generic' then
-      base = global_base
+      base = pathJoin(os.getenv('HOME'))
 else
       LmodError('Error the module ' .. name .. '/' .. version .. ' is not defined well, please contact support.')
 end
@@ -80,7 +80,8 @@ setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
 -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
 append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
 
-setenv('R_LIBS', pathJoin(base, 'R_packages'))
+r_path = pathJoin(base, 'R_packages')
+setenv('R_LIBS', r_path)
 
 -- for custom architecture dependent repo
 EASYBUILD_PREFIX = pathJoin(base, 'easybuild', arch)
