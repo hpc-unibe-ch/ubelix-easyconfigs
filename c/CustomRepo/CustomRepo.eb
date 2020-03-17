@@ -71,28 +71,31 @@ if not ebver == nil then
     ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
     prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(ebpath, '/easybuild/easyconfigs/'))
 end
--- Don't warn for this and Easybuild module during eb process
-modules = 'EasyBuild,' .. name
-setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
-setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
 
--- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
--- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
-append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
+if (os.getenv('USER') ~= 'l_easybuild') then
+    -- Don't warn for this and Easybuild module during eb process
+    modules = 'EasyBuild,' .. name
+    setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
+    setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
 
-r_path = pathJoin(base, 'R_packages')
-setenv('R_LIBS', r_path)
+    -- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
+    -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
+    append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
 
--- for custom architecture dependent repo
-EASYBUILD_PREFIX = pathJoin(base, 'easybuild', arch)
-setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
-setenv('EASYBUILD_INSTALLPATH_MODULES', pathJoin(EASYBUILD_PREFIX, 'modulefiles'))
-prepend_path('EASYBUILD_SOURCEPATH', pathJoin(base, 'easybuild', 'sources'))
-prepend_path('MODULEPATH', pathJoin(EASYBUILD_PREFIX, 'modulefiles', 'all'))
-setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
+    r_path = pathJoin(base, 'R_packages')
+    setenv('R_LIBS', r_path)
 
--- for custom generic repo
-prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modulefiles', 'all'))
+    -- for custom architecture dependent repo
+    EASYBUILD_PREFIX = pathJoin(base, 'easybuild', arch)
+    setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
+    setenv('EASYBUILD_INSTALLPATH_MODULES', pathJoin(EASYBUILD_PREFIX, 'modulefiles'))
+    prepend_path('EASYBUILD_SOURCEPATH', pathJoin(base, 'easybuild', 'sources'))
+    prepend_path('MODULEPATH', pathJoin(EASYBUILD_PREFIX, 'modulefiles', 'all'))
+    setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
+
+    -- for custom generic repo
+    prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modulefiles', 'all'))
+end
 """
 
 
