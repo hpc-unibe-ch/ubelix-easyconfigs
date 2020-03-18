@@ -1,0 +1,37 @@
+easyblock = 'ConfigureMake'
+
+name = 'libspatialite'
+version = '4.3.0a'
+
+homepage = "https://www.gaia-gis.it/fossil/libspatialite/home"
+description = """SpatiaLite is an open source library intended to extend the SQLite core to support
+ fully fledged Spatial SQL capabilities."""
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+toolchainopts = {'pic': True}
+
+source_urls = ['https://www.gaia-gis.it/gaia-sins/']
+sources = [SOURCE_TAR_GZ]
+
+builddependencies = [
+    ('CMake', '3.15.3'),
+    ('binutils', '2.32'),
+]
+
+dependencies = [
+    ('FreeXL', '1.0.5'),
+    ('GEOS', '3.8.0'),
+    ('SQLite', '3.31.1'),
+    ('PROJ', '6.3.1'),
+    ('libxml2', '2.9.10'),
+]
+
+patches = ['libspatialite_proj6.patch']
+preconfigopts = 'autoconf && autoheader && '
+
+sanity_check_paths = {
+    'files': ['include/spatialite.h', 'lib/libspatialite.a', 'lib/libspatialite.%s' % SHLIB_EXT],
+    'dirs': ['include/spatialite'],
+}
+
+moduleclass = 'lib'

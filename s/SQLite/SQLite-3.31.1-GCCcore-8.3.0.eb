@@ -1,0 +1,42 @@
+##
+# This file is an EasyBuild reciPY as per https://github.com/hpcugent/easybuild
+#
+# Copyright:: Copyright 2012-2014 Uni.Lu/LCSB, NTUA
+# Authors::   Fotis Georgatos <fotis@cern.ch>
+# License::   MIT/GPL
+# $Id$
+#
+# This work implements a part of the HPCBIOS project and is a component of the policy:
+# http://hpcbios.readthedocs.org/en/latest/
+##
+
+easyblock = 'ConfigureMake'
+
+name = 'SQLite'
+version = "3.31.1"
+
+homepage = 'http://www.sqlite.org/'
+description = 'SQLite: SQL Database Engine in a C Library'
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+
+import time as _time
+source_urls = ['https://www.sqlite.org/%s' % _year for _year in range(_time.gmtime().tm_year, 2018, -1)]
+_version_str = '{:>1}{:>02}{:>02}{:>02}'.format(*version.split('.')+[0])
+sources = ['sqlite-autoconf-%s.tar.gz' % _version_str]
+
+builddependencies = [
+    ('binutils', '2.32'),
+]
+dependencies = [
+    ('zlib', '1.2.11'),
+    ('libreadline', '8.0'),
+]
+
+sanity_check_paths = {
+    'files': ['bin/sqlite3', 'include/sqlite3ext.h', 'include/sqlite3.h', 'lib/libsqlite3.a',
+              'lib/libsqlite3.%s' % SHLIB_EXT],
+    'dirs': ['lib/pkgconfig'],
+}
+
+moduleclass = 'devel'

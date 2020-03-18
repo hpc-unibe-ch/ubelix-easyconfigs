@@ -1,0 +1,33 @@
+easyblock = 'ConfigureMake'
+
+name = 'PROJ'
+version = '6.3.1'
+
+homepage = 'http://trac.osgeo.org/proj/'
+description = """Program proj is a standard Unix filter function which converts
+geographic longitude and latitude coordinates into cartesian coordinates"""
+
+toolchain = {'name': 'GCCcore', 'version': '8.3.0'}
+toolchainopts = {'pic': True}
+
+source_urls = ['http://download.osgeo.org/proj/']
+sources = [SOURCELOWER_TAR_GZ]
+#checksums = ['4510a2c1c8f9056374708a867c51b1192e8d6f9a5198dd320bf6a168e44a3657']
+
+builddependencies = [
+    ('binutils', '2.32'),
+]
+
+dependencies = [
+    ('SQLite', '3.31.1'),
+    ('LibTIFF', '4.0.10'),
+    ('cURL', '7.66.0','',('GCCcore','8.3.0')),
+]
+
+sanity_check_paths = {
+    'files': ['bin/cs2cs', 'bin/geod', 'bin/invgeod', 'bin/invproj',
+              'bin/proj'],
+    'dirs': [],
+}
+
+moduleclass = 'lib'

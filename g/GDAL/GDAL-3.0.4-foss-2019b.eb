@@ -1,0 +1,62 @@
+easyblock = 'ConfigureMake'
+
+name = 'GDAL'
+version = '3.0.4'
+
+homepage = 'http://www.gdal.org/'
+description = """GDAL is a translator library for raster geospatial data formats that is released under an X/MIT style
+ Open Source license by the Open Source Geospatial Foundation. As a library, it presents a single abstract data model
+ to the calling application for all supported formats. It also comes with a variety of useful command-line utilities for
+ data translation and processing.
+ NOTE: The GDAL IO cache by default uses 5% of total memory. This seems not necessary. This module sets GDAL_CACHEMAX=256 (256MB),
+ which should have no performance impact. Feel free to change if necessary, using 'export GDAL_CACHEMAX=xxx' (in your job script)
+ after loading the GDAL module. """
+
+toolchain = {'name': 'foss', 'version': '2019b'}
+
+source_urls = ['https://download.osgeo.org/gdal/%(version)s/']
+sources = [SOURCELOWER_TAR_XZ]
+
+dependencies = [
+    ('expat', '2.2.9'),
+    ('libjpeg-turbo', '2.0.3','',('GCCcore','8.3.0')),     # JPEG Classic
+    ('OpenJPEG', '2.3.1'),          # JPEG 2000
+    ('HDF', '4.2.15'),
+    ('KEALib', '1.4.12','',('gompi','2019b')),           # pulls in HDF5
+    ('libgeotiff', '1.5.1','',('GCCcore', '8.3.0')),        # pulls in libTIFF and PROJ
+    ('libpng', '1.6.37'),           # pulls in zlib
+    ('libspatialite', '4.3.0a'),    # pulls in FreeXL, GEOS, PROJ (again), libxml2 (again) and SQLite
+    ('libxml2', '2.9.10'),          # pulls in zlib (again)
+    ('netCDF', '4.7.3'),            # pulls in HDF5 (again), cURL and Szip
+    ('PCRE', '8.43'),
+    ('PostgreSQL', '11.7'),         # pulls in libreadline and zlib (again)
+    ('PROJ', '6.3.1'),
+]
+
+configopts  = '--with-expat=$EBROOTEXPAT'
+configopts += ' --with-hdf4=$EBROOTHDF'
+configopts += ' --with-hdf5=$EBROOTHDF5'
+configopts += ' --with-geos=$EBROOTGEOS/bin/geos-config'
+configopts += ' --with-kea=yes'
+configopts += ' --with-geotiff=$EBROOTLIBGEOTIFF'
+#configopts += ' --with-jasper=$EBROOTJASPER'
+configopts += ' --with-jpeg=$EBROOTLIBJPEGMINTURBO'
+configopts += ' --with-openjpeg=$EBROOTOPENJPEG'
+configopts += ' --with-png=$EBROOTLIBPNG'
+configopts += ' --with-libtiff=$EBROOTLIBTIFF'
+configopts += ' --with-xml2=$EBROOTLIBXML2'
+configopts += ' --with-netcdf=$EBROOTNETCDF'
+configopts += ' --with-pcre=$EBROOTPCRE'
+configopts += ' --with-spatialite=$EBROOTGEOS'
+configopts += ' --with-sqlite3=$EBROOTSQLITE'
+configopts += ' --with-libz=$EBROOTZLIB'
+configopts += ' --without-grass --without-pam --without-python'
+
+modextravars = {'GDAL_CACHEMAX': '256'}
+
+sanity_check_paths = {
+    'files': ['lib/libgdal.%s' % SHLIB_EXT, 'lib/libgdal.a'],
+    'dirs': ['bin', 'include']
+}
+
+moduleclass = 'geo'
