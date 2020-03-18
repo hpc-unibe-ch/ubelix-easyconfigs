@@ -1,0 +1,10 @@
+--- configure.ac.orig   2020-03-17 12:05:26.374885000 +1300
++++ configure.ac        2020-03-17 12:50:49.298123000 +1300
+@@ -178,4 +178,7 @@
+ #   --enable-proj
+ #
++AC_DEFINE(ACCEPT_USE_OF_DEPRECATED_PROJ_API_H)
++AH_TEMPLATE([ACCEPT_USE_OF_DEPRECATED_PROJ_API_H],
++            [Must be defined in order to use PROJ 5, 6 or 7.])
+ AC_ARG_ENABLE(proj, [AS_HELP_STRING(
+   [--enable-proj], [enables PROJ.4 inclusion [default=yes]])],

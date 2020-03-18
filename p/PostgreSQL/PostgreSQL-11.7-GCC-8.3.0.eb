@@ -1,0 +1,32 @@
+easyblock = 'ConfigureMake'
+
+name = 'PostgreSQL'
+version = '11.7'
+
+homepage = 'https://www.postgresql.org/'
+description = """Object-relational database system."""
+
+toolchain = {'name': 'GCC', 'version': '8.3.0'}
+
+source_urls = ['http://ftp.postgresql.org/pub/source/v%(version)s/']
+sources = [SOURCELOWER_TAR_BZ2]
+checksums = ['324ae93a8846fbb6a25d562d271bc441ffa8794654c5b2839384834de220a313']
+
+dependencies = [
+    ('libreadline', '8.0'),
+    ('zlib', '1.2.11'),
+    # OS dependency should be preferred if the os version is more recent then this version,
+    # it's nice to have an up to date openssl for security reasons
+    # ('OpenSSL', '1.0.2h'),
+]
+
+osdependencies = [('openssl-devel', 'libssl-dev', 'libopenssl-devel')]
+
+configopts = '--with-openssl'
+
+sanity_check_paths = {
+    'files': ['bin/psql', 'bin/pg_config', 'lib/libpq.a', 'lib/libpq.%s' % SHLIB_EXT],
+    'dirs': ['share/postgresql'],
+}
+
+moduleclass = 'data'
