@@ -1,0 +1,25 @@
+easyblock = 'Tarball'
+
+name = 'sublime'
+version = '3'
+
+homepage = "https://www.sublimetext.com/"
+description = """Text editor with GUI"""
+
+toolchain = SYSTEM
+
+# Nothing to be done here
+
+source_urls = ['https://download.sublimetext.com/']
+sources = ['sublime_text_3_build_3211_x64.tar.bz2']
+
+modextrapaths = {
+    'PATH': [''],
+}
+
+sanity_check_paths = {
+    'files': [],
+    'dirs': ['/bin'],
+}
+
+moduleclass = 'tools'
