@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['9c6091e37ab1054d6ca23498c62507cbab76f3090998a589c094f348ecb31f7a']
+checksums = ['d5b6d8d5ab905db24512c7cb65fb33ae2716e41e7f7560ac9652b8abeb4ffe36']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
@@ -96,11 +96,11 @@ if (os.getenv('USER') ~= 'l_easybuild') then
 
     -- for custom generic repo
     prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic.el7', 'modulefiles', 'all'))
-    setenv('EASYBUILD_PREFIX_GENERIC', pathJoin(base, 'easybuild', 'generic.el7'))
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', pathJoin(base, 'easybuild', 'generic.el7'))
 else
     -- standard variables not necessary for global installation
     -- settings for generic software stack
-    setenv('EASYBUILD_PREFIX_GENERIC', global_base_generic)
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX_GENERIC', global_base_generic)
 end
 """
 
