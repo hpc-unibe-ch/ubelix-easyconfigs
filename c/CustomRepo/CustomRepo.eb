@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['682c26df00206a81864201e1ff362b357d6efb5354a242bcae171044521ae4e5']
+checksums = ['9c6091e37ab1054d6ca23498c62507cbab76f3090998a589c094f348ecb31f7a']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
@@ -36,6 +36,7 @@ arch_typ = string.gsub(arch_typ, '\\\n', '')
 
 -- global easybuild resources
 local global_base = '/software.el7'
+local global_base_generic = '/storage/software/generic.el7'
 local EB_base = os.getenv('EBROOTEASYBUILD')
 
 -- get the base directory, depending on the module version
@@ -94,7 +95,12 @@ if (os.getenv('USER') ~= 'l_easybuild') then
     setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
 
     -- for custom generic repo
-    prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic', 'modulefiles', 'all'))
+    prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic.el7', 'modulefiles', 'all'))
+    setenv('EASYBUILD_PREFIX_GENERIC', pathJoin(base, 'easybuild', 'generic.el7'))
+else
+    -- standard variables not necessary for global installation
+    -- settings for generic software stack
+    setenv('EASYBUILD_PREFIX_GENERIC', global_base_generic)
 end
 """
 
