@@ -100,7 +100,7 @@ if (os.getenv('USER') ~= 'l_easybuild') then
 else
     -- standard variables not necessary for global installation
     -- settings for generic software stack
-    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX_GENERIC', global_base_generic)
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
 end
 """
 
