@@ -101,6 +101,8 @@ else
     -- standard variables not necessary for global installation
     -- settings for generic software stack
     setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
+    -- provide hooks
+    setenv('EASYBUILD_HOOKS', pathJoin(ebpath, '/easybuild/easyconfigs', 'ubelix_hooks.py')
 end
 """
 
