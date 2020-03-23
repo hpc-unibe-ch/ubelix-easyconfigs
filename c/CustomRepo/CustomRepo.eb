@@ -108,7 +108,7 @@ else
     if ebver == nil then
        LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
     end
-    setenv('EASYBUILD_HOOKS', pathJoin(ebpath, '/easybuild/easyconfigs', 'ubelix_hooks.py'))
+    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
 end
 """
 
