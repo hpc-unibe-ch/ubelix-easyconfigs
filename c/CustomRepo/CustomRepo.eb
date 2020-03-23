@@ -74,6 +74,7 @@ ebver = os.getenv('EBVERSIONEASYBUILD')
 if not (ebver == nil) then
     ebpath = '/storage/software/ivybridge.el7/software/EasyBuild/' .. os.getenv('EBVERSIONEASYBUILD')
     prepend_path('EASYBUILD_ROBOT_PATHS', pathJoin(ebpath, '/easybuild/easyconfigs/'))
+    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
 end
 
 if (os.getenv('USER') ~= 'l_easybuild') then
@@ -108,7 +109,6 @@ else
     if ebver == nil then
        LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
     end
-    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
 end
 """
 
