@@ -32,7 +32,9 @@ local_prep_env = "PATH=%(installdir)s/bin:$PATH "
 postinstallcmds = [
         # tool for portforwarding to compute nodes for Jupyter lab
         'cp %(builddir)s/jupyter-compute %(installdir)s/bin/jupyter-compute;'
+        'cp %(builddir)s/jupyter_remote_port_forward %(installdir)s/bin/jupyter_remote_port_forward;'
         'chmod +x %(installdir)s/bin/jupyter-compute;'
+        'chmod +x %(installdir)s/bin/jupyter_remote_port_forward;'
         # R kernel
         'mkdir %(installdir)s/share/jupyter/kernels/r; '
         'cp %(builddir)s/r_kernel.json %(installdir)s/share/jupyter/kernels/r/kernel.json;'
