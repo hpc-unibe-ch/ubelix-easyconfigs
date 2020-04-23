@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['3f9df7fc1a8dcba49654edc3ff116a97990408533c5d81054c32892f80dc84aa']
+checksums = ['2d92e6dd400c6babc8ea0f6bbad7969f34d788c9137b23651826eb27f31e98d2']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
@@ -97,8 +97,10 @@ if (os.getenv('USER') ~= 'l_easybuild') then
     setenv('EASYBUILD_PACKAGEPATH', pathJoin(base, 'easybuild', 'easybuild-resources', 'packages'))
 
     -- for custom generic repo
-    prepend_path('MODULEPATH', pathJoin(base, 'easybuild', 'generic.el7', 'modulefiles', 'all'))
-    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', pathJoin(base, 'easybuild', 'generic.el7'))
+    GENERIC_EASYBUILD_PREFIX = pathJoin(base, 'easybuild', 'generic.el7')
+    prepend_path('MODULEPATH', pathJoin(GENERIC_EASYBUILD_PREFIX, 'modulefiles', 'all'))
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', GENERIC_EASYBUILD_PREFIX)
+    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(GENERIC_EASYBUILD_PREFIX, 'modulefiles'))
 else
     -- standard variables not necessary for global installation
     -- settings for generic software stack
