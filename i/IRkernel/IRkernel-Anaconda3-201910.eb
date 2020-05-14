@@ -3,17 +3,17 @@ easyblock = 'Bundle'
 
 name = 'IRkernel'
 version = '1.1'
-local_rver = '3.6.0'
-local_pyver = '2019.10'
+local_rver = '4.0.0'
+local_pyver = '2020.02'
 #versionsuffix = '-R-%(local_rver)s-Anaconda3-%(local_pyver)s'
-versionsuffix = '-R-3.6.0-Anaconda3-2019.10'
+versionsuffix = '-R-4.0.0-Anaconda3-2019.10'
 
 homepage = 'https://irkernel.github.io'
 description = """The R kernel for the 'Jupyter' environment executes R code 
  which the front-end (Jupyter Notebook or other front-ends) submits to the 
  kernel via the network."""
 
-toolchain = {'name': 'foss', 'version': '2019a'}
+toolchain = {'name': 'foss', 'version': '2019b'}
 
 dependencies = [
     ('R', local_rver),
