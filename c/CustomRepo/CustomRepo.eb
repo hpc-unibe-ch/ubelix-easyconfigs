@@ -31,7 +31,7 @@ require 'os'
 
 local name = myModuleName()
 local version = myModuleVersion()
-local arch_typ = subprocess("gcc -march=native -Q --help=target | grep march | awk '{print $2}'")
+local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
 arch_typ = string.gsub(arch_typ, '\\\n', '')
 
 -- global easybuild resources
