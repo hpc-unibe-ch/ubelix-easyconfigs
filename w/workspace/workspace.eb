@@ -1,0 +1,195 @@
+# author: mandes.schoenherr@unibe.ch
+easyblock = 'Tarball'
+
+name = 'Workspace'
+version = '202009'
+
+#hidden = True
+
+homepage = 'https://hpc-unibe-ch.github.io/hpc-unibe-ch.github.io/user-guide/software/'
+description = """UniBE module for setting environment to specific workspace.
+It provides easy access to data and software packages. Including custom module files.
+To install custom software in that workspcae use EasyBuild as described in the documentation.
+"""
+
+toolchain = SYSTEM
+sources = ['eb_wrapper.tar.gz']
+
+#builddependencies = [('EasyBuild', '4.0.1')]
+
+#postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
+#                    'rm user.lua institute.lua project.lua; '
+#                    'ln -s .generic.lua user.lua; '
+#                    'ln -s .generic.lua institute.lua; '
+#                    'ln -s .generic.lua project.lua;']
+
+modextrapaths = {'PATH': ''}
+
+modluafooter = """
+local workspaceDirs='/gpfs/workspaces/ /home/ubelix/id/ms20e149/tmp/workspaces/'
+local scratchDir='/scratch'
+local ws_identifier='.WStype'
+
+local WS_VAR='UNIBE_HPC_DEFAULT_WORKSPACE'
+
+local name = myModuleName()
+local version = myModuleVersion()
+
+local function CustomRepo(workspace)
+  local wsSW = pathJoin(workspace, 'Software')
+  local global_base = '/software.el7'
+  local global_base_generic = '/storage/software/generic.el7'
+  local EB_base = os.getenv('EBROOTEASYBUILD')
+
+  prepend_path("MODULEPATH", workspace..'/'..'modulefiles')
+
+  -- distinguish different software stacks
+  local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
+  arch_typ = string.gsub(arch_typ, '\\\n', '')
+  if ( arch_typ == 'corei7-avx' or arch_typ == 'sandybridge') then
+        arch = 'sandybridge.el7'
+  elseif ( arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
+        arch = 'ivybridge.el7'
+  elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
+        arch = 'broadwell.el7'
+  else
+        LmodError('ERROR: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' ..
+                  arch_typ .. ', please contact support. ')
+  end
+  ebver = os.getenv('EBVERSIONEASYBUILD')
+  if not (ebver == nil) then
+    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
+  end
+
+  -- Don't warn for this and Easybuild module during eb process
+  modules = 'EasyBuild,' .. name
+  setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
+  setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
+
+  -- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
+  -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
+  append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
+
+  r_path = pathJoin(base, 'R_packages')
+  setenv('R_LIBS', r_path)
+
+  -- for custom architecture dependent repo
+  EASYBUILD_PREFIX = pathJoin(wsSW, arch, 'easybuild')
+  setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
+  setenv('EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, arch, 'modulefiles'))
+  prepend_path('EASYBUILD_SOURCEPATH', pathJoin(wsSW, 'sources'))
+  prepend_path('MODULEPATH', pathJoin(wsSW, arch, 'modulefiles', 'all'))
+  --setenv('EASYBUILD_PACKAGEPATH', pathJoin(EASYBUILD_PREFIX, 'easybuild-resources', 'packages'))
+
+  -- for custom generic repo
+  GENERIC_EASYBUILD_PREFIX = pathJoin(wsSW, 'generic.el7', 'easybuild')
+  prepend_path('MODULEPATH', pathJoin(wsSW, 'generic.el7', 'modulefiles', 'all'))
+  setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', GENERIC_EASYBUILD_PREFIX)
+  setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, 'generic.el7', 'modulefiles'))
+end
+
+local function setWorkspace(ws)
+  local wsDir, wsName = unpack(ws)
+  local workspace = pathJoin(wsDir, wsName)
+  -- easy access to spaces
+  setenv('WORKSPACE', workspace)
+  setenv('SCRATCH',   pathJoin(scratchDir, wsName))
+
+  -- SLURM accounting
+  setenv('SBATCH_ACCOUNT', wsName)
+
+  -- Custom SW repo
+  CustomRepo(workspace)
+  LmodMessage('Workspace environment set for: '..workspace)
+end
+
+local function WorkspaceAccess(ws)
+  local code, out = subprocess('find '..ws..'/ -maxdepth 0 -type f -perm -g=rx')
+  if code == 0 then
+    res = true
+  else
+    res = false
+  end
+  return res
+end
+
+local function getWorkspaces(ws_name)
+  if (ws_name == '' or ws_name == nil) then
+    ws_name = '*'
+  end
+  local t={}
+  local ws_count = 0
+  for wsDir in string.gmatch(workspaceDirs, '%S+') do
+    -- get all accessible workspaces in particular directory
+    --    or search for particular accessible workspace
+    local search=pathJoin(wsDir,ws_name,ws_identifier)
+    local dirs = subprocess('find '..search..' -maxdepth 0 2> /dev/null ')
+    dirs = string.gsub(dirs, '\\\n', ' ')
+
+    regex=wsDir..'([%a%p]+)/'..ws_identifier
+    for ws in string.gmatch(dirs, regex) do
+      table.insert(t, {wsDir, ws})
+      ws_count = ws_count+1
+    end
+  end
+  return ws_count, t
+end
+
+local function isempty(s)
+  return s == nil or s == ''
+end
+
+-- main with determing the workspace
+if mode() == 'load' then
+ws_set = os.getenv(WS_VAR)
+
+  if ( not( isempty(ws_set) ) ) then
+    -- selected workspace
+    local count, ws = getWorkspaces(ws_set)
+    if count == 0 then
+      LmodError('The selected workspace ', WS_VAR, '=', ws_set,
+                ' is not available for you or does not exist')
+    elseif (count > 1) then
+      LmodError('There are multiple workspaces with that name ',
+                WS_VAR, '=', ws_set,'. This should not be the case, ',
+                'please contact support.')
+    end
+    setWorkspace(ws[1])
+
+  else
+
+    local ws_count, ws = getWorkspaces()
+    -- for single / selected Workspace
+    if ( ws_count == 1 ) then
+       setWorkspace(ws[1])
+    elseif (ws_count > 1) then
+    -- if multiple workspaces available, list then
+      local str = ""
+      for i, locDir in ipairs(ws) do
+        loc, dir = unpack(locDir)
+        str=str..dir..', '
+      end
+      LmodMessage('Workspaces are available: \\\n',
+                  '   ', str, ' \\\n',
+                  'Please set the variable '..WS_VAR..' to one of it and reload, e.g.\\\n',
+                  '    export '..WS_VAR..'='..ws[1][2]..'; \\\n',
+                  '    module load '..name..' \\\n')
+    else
+      -- no workspace available
+      LmodMessage('There are no workspaces detected for you, ',
+                  'if you already have one, please contact support. \\\n')
+    end
+  end
+end
+
+"""
+
+
+
+sanity_check_paths = {
+    'files': ['eb-install-all', 'eb-install-generic'],
+    'dirs': [''],
+}
+
+moduleclass = 'base'
+
