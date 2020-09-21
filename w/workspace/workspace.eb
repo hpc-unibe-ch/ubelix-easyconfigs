@@ -178,6 +178,7 @@ ws_set = os.getenv(WS_VAR)
       -- no workspace available
       LmodMessage('There are no workspaces detected for you, ',
                   'if you already have one, please contact support. \\\n')
+      LmodError('please select a workspace and load again')
     end
   end
 end
