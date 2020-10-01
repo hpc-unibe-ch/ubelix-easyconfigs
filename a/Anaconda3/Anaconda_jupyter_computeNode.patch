@@ -7,6 +7,8 @@
 +# starts jupyter lab
 +#  mandes.schoenherr@id.unibe.ch
 +
++qos="--qos=job_interactive"
++
 +print_help(){
 +      echo "Usage: $0 port [OPTIONS...] "
 +      echo "Wrapper to launch the Jupyter Lab server on an UBELIX compute nodes."
@@ -54,6 +56,10 @@
 +      jupyter_args="`echo $1 | sed -e 's/^[^=]*=//g'`"
 +      shift
 +      ;;
++    --no-qos)
++      qos=""
++      shift
++      ;;
 +    *)
 +      args="$args $1"
 +      shift
@@ -61,7 +67,7 @@
 +  esac
 +done
 +
-+srun --x11 --qos=job_interactive $args jupyter_remote_port_forward $port $jupyter_args
++srun --x11 $qos --qos=job_interactive $args jupyter_remote_port_forward $port $jupyter_args
 +
 --- jupyter_remote_port_forward	1970-01-01 01:00:00.000000000 +0100
 +++ jupyter_remote_port_forward	2020-04-02 10:48:54.675792000 +0200
