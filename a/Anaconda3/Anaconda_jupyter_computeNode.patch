@@ -15,9 +15,10 @@
 +      echo "Note: All options are forwarded to SLURM, beside of the ones listed below. "
 +      echo "      The port needs to be first argument, then the order is arbitrary"
 +      echo " "
-+      echo "port                             needs to be a number between 2000 and 65000"
++      echo "  port                             needs to be a number between 2000 and 65000"
 +      echo "options:"
 +      echo "  -h, --help                       show brief help"
++      echo "  --no-qos                         disable special QOS
 +      echo "  --jupyter_args='--help'          valid Jupyter Lab can be specified"
 +      echo " "
 +      echo "For more information visit: https://hpc-unibe-ch.github.io/user-guide/software/JupyterLab.html"
