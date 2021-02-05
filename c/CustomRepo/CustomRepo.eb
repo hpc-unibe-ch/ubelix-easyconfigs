@@ -22,6 +22,7 @@ postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'rm user.lua institute.lua project.lua; '
                     'ln -s .generic.lua user.lua; '
                     'ln -s .generic.lua institute.lua; '
+                    'ln -s .generic.lua ws_inst.lua; '
                     'ln -s .generic.lua project.lua;']
 
 modextrapaths = {'PATH': ''}
@@ -45,6 +46,10 @@ if version == 'user' then
       base = pathJoin(os.getenv('HOME'))
 elseif version == 'institute' then
       base = pathJoin(os.getenv('HOME'), '..', 'shared')
+elseif version == 'ws_inst' then
+      local code, out = subprocess("groups | awk '{print $1}'")
+      group = string.gsub(out, '\n', '')
+      base = pathJoin('/storage/homefs/', group)
 elseif version == 'project' then
       if not os.getenv("CUSTOM_REPO_PROJECT_ID") then
             LmodError("ERROR: You need to specify the project ID in environment " ..
@@ -76,6 +81,7 @@ if not (ebver == nil) then
 end
 
 if (os.getenv('USER') ~= 'l_easybuild') then
+    setenv('WORKSPACE', base)
     -- Don't warn for this and Easybuild module during eb process
     modules = 'EasyBuild,' .. name
     setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
@@ -105,6 +111,7 @@ else
     -- standard variables not necessary for global installation
     -- settings for generic software stack
     setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
+    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(global_base_generic, 'modulefiles'))
     -- provide hooks
     if ebver == nil then
        LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
