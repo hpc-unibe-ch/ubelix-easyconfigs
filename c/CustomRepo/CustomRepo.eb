@@ -49,7 +49,7 @@ elseif version == 'institute' then
 elseif version == 'ws_inst' then
       local out = subprocess("groups | awk '{print $1}' ")
       group = string.gsub(out, '\\n', '')
-      base = pathJoin('/storage/homefs/', group)
+      base = pathJoin('/home/ubelix/', group, 'shared')
 elseif version == 'project' then
       if not os.getenv("CUSTOM_REPO_PROJECT_ID") then
             LmodError("ERROR: You need to specify the project ID in environment " ..
