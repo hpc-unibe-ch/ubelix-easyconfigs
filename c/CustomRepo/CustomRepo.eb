@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['2d92e6dd400c6babc8ea0f6bbad7969f34d788c9137b23651826eb27f31e98d2']
+checksums = ['2bfa38b9989efd6fc39d8d788c960c2eaef3f8ce1aa259ce540ea2f1878168e2']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
@@ -70,6 +70,8 @@ elseif (arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
       arch = 'ivybridge.el7'
 elseif (arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
       arch = 'broadwell.el7'
+elseif (arch_typ == 'btver2' or arch_typ == 'amd') then
+      arch = 'epyc2.el7'
 else
       LmodError('ERROR: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' .. 
                 arch_typ .. ', please contact support. ')
