@@ -73,8 +73,9 @@ elseif (arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
 elseif (arch_typ == 'btver2' or arch_typ == 'amd') then
       arch = 'epyc2.el7'
 else
-      LmodError('ERROR: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' .. 
-                arch_typ .. ', please contact support. ')
+      LmodMessage('WARNING: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' .. 
+                arch_typ .. ', please contact support. Using fallback to sandybridge')
+      arch = 'sandybridge.el7'
 end
 
 ebver = os.getenv('EBVERSIONEASYBUILD')
