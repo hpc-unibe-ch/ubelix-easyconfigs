@@ -1,4 +1,5 @@
-# author: mandes.schoenherr@unibe.ch
+# author: # Mandes Schönherr (mandes.schoenherr@unibe.ch) mand35@github
+# in casses of issues or feature request write UniBe HPC support
 easyblock = 'Tarball'
 
 name = 'Workspace'
@@ -22,8 +23,8 @@ Custom Software Stack:
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 checksums = [
-    'f1c3779f406bc952b1129fa3fc1aa69caf7518c55ab0c378796c9193da3150a0',  # CustomRepo.tar.gz
-    '37f139bb1845b67ffd440ed36abc466f7499795cc6748c8963818f08ad888b7a',  # ws_tools.tar.gz
+    '9f6a0bafb7fbc9c266633d06d44872bad04d180c4405cd44cf288db00e476669',  # CustomRepo.tar.gz
+    'ad85b996cd5e7557699269df359a31d34e02d13e6651b5c457f73dd8ecaa4d2e',  # ws_tools.tar.gz
 ]
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
