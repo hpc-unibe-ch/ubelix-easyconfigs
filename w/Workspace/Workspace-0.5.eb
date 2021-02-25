@@ -206,7 +206,9 @@ local function findAndSetWS()
     else
       -- no workspace available
       LmodMessage('There are no workspaces detected for you, ',
-                  'if you already have one, please contact support.'..newline)
+                  'if you already have one, please contact support.'..newline..
+                  'If you want to use your $HOME instead, please load '..name..'/home')
+      execute {cmd="module unload "..name,modeA={"load"}}
     end
   end
 end
