@@ -23,8 +23,8 @@ Custom Software Stack:
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 checksums = [
-    '370640b634a8d0749e5b34344354248b2e2cea4d795e7903da9ce0e111c6b3d2',  # CustomRepo.tar.gz
-    '2cf9708169651b1d1ff7d587a25d258d5a711682b6777816916161083b7430d7',  # ws_tools.tar.gz
+    '9421798f7fcc4627d4b49ab79f493a93d37e073a369c0953fb8472788802424a',  # CustomRepo.tar.gz
+    'cd470878a89e25d37b94df35f23a1f5d3526314575df21055f3a6c871eb9aefe',  # ws_tools.tar.gz
 ]
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
