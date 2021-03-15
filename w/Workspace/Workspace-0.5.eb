@@ -7,14 +7,16 @@ version = '0.5'
 
 homepage = 'https://hpc-unibe-ch.github.io/hpc-workspaces/environment.html'
 description = """UniBE HPC Workspace module for easy access to data and custom Sorftware of an specific HPC workspace.
-The modules searches available Workspaces and loades the single one or provides choices of multiple are available.
+The modules searches available Workspaces and loades the `the one you belong to` or provides choices, if more than one are available for you.
+
 When loaded it provides:
-- environment variables to Workspace and related SCRATCH space
-- workspace software stack
+- environment variables to WORKSPACE and related SCRATCH space
+- sets umask for group writeable files/directories
+- workspace software stack (see below)
 - workspace SLURM account
 
 Custom Software Stack:
-- to install new package with Easybuild load `module load Easybuild` and use
+- to INSTALL new package with Easybuild load `module load Easybuild` and use
   `eb_install_all` for installing package for each CPU architecture OR
   `eb_install_generic` for installing a architecture independent package.
 - installed packages shoulg be automatically available after loading this Workspace module
