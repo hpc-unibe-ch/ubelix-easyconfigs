@@ -21,10 +21,9 @@ Custom Software Stack:
 """
 
 toolchain = SYSTEM
+#sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 sources = ['CustomRepo.tar.gz']
-checksums = [
-    'f2d965b98d947f61fb47f3cae36f9b205211fc32c7f238d9176b6e34af434211',  # CustomRepo.tar.gz
-]
+checksums = ['65ef0ee9edb72e886cf0f82f5ba76b841a8b22c1e0fdbc2a07f9cc6c5b98f88d']
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'rm home.lua; '
@@ -125,7 +124,20 @@ local function setWorkspace(ws)
 
   -- Custom SW repo
   CustomRepo(workspace)
-  LmodMessage('Workspace environment set for:'..newline..'   '..workspace)
+
+  -- set umask
+  local gumask = os.getenv('WORKSPACE_PRELOAD_UMASK')
+  if gumask == nil then
+    gumask = subprocess("umask")
+  end
+  execute{cmd="umask "..gumask, modeA={"unload"}}
+  execute{cmd="umask 002", modeA={"load"}}
+  setenv('WORKSPACE_PRELOAD_UMASK', gumask)
+  if (mode() == 'load') then
+    LmodMessage('Workspace environment set for:'..newline..'   '..workspace)
+  elseif (mode() == 'unload') then
+    unsetenv('WORKSPACE_PRELOAD_UMASK')
+  end
 end
 
 local function WorkspaceAccess(ws)
@@ -213,12 +225,10 @@ local function findAndSetWS()
 end
 
 -- main with determing the workspace
-if mode() == 'load' then
-  if version == 'home' then
-    setHome()
-  else
-    findAndSetWS()
-  end
+if version == 'home' then
+  setHome()
+else
+  findAndSetWS()
 end
 """
 
