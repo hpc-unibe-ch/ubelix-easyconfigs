@@ -20,6 +20,9 @@ Custom Software Stack:
   `eb_install_all` for installing package for each CPU architecture OR
   `eb_install_generic` for installing a architecture independent package.
 - installed packages shoulg be automatically available after loading this Workspace module
+
+Singularity:
+- sets SINGULARITY_BINDPATH to the Workspace directory
 """
 
 toolchain = SYSTEM
@@ -103,6 +106,10 @@ local function CustomRepo(workspace)
   setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, 'generic.el7', 'modulefiles'))
 end
 
+local function generalVars(ws_dir)
+  setenv('SINGULARITY_BINDPATH', ws_dir..':'..ws_dir)
+end
+
 local function setHome()
   local path = pathJoin(os.getenv('HOME'))
   local user = os.getenv('USER')
@@ -110,6 +117,7 @@ local function setHome()
   setenv('SCRATCH',   pathJoin(scratchDir, 'users', user))
   CustomRepo(path)
   LmodMessage('Workspace environment set for HOME:'..user)
+  generalVars(path)
 end
 
 local function setWorkspace(ws)
@@ -118,6 +126,7 @@ local function setWorkspace(ws)
   -- easy access to spaces
   setenv('WORKSPACE', workspace)
   setenv('SCRATCH',   pathJoin(scratchDir, rg, wsName))
+  generalVars(workspace)
 
   -- SLURM accounting
   setenv('SBATCH_ACCOUNT', wsName)
