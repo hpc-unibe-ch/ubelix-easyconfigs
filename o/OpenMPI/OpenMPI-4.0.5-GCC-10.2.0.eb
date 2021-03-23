@@ -1,5 +1,6 @@
 name = 'OpenMPI'
 version = '4.0.5'
+versionsuffix = "_test"
 
 homepage = 'https://www.open-mpi.org/'
 description = """The Open MPI Project is an open source MPI-3 implementation."""
@@ -18,15 +19,15 @@ dependencies = [
     ('zlib', '1.2.11'),
     ('hwloc', '2.2.0'),
     ('libevent', '2.1.12'),
-    ('UCX', '1.9.0'),
     ('libfabric', '1.11.0'),
-    ('PMIx', '3.1.5'),
 ]
 
 # disable MPI1 compatibility for now, see what breaks...
-# configopts = '--enable-mpi1-compatibility '
+#configopts = '--enable-mpi1-compatibility '
 
 # to enable SLURM integration (site-specific)
-configopts = '--with-slurm --with-pmi -with-ucx'
+configopts = '--with-slurm --with-pmi'
+
+modextravars = {'OMPI_MCA_btl_openib_allow_ib': 'true'}
 
 moduleclass = 'mpi'
