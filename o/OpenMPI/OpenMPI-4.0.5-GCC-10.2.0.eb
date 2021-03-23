@@ -1,6 +1,5 @@
 name = 'OpenMPI'
 version = '4.0.5'
-versionsuffix = "_test"
 
 homepage = 'https://www.open-mpi.org/'
 description = """The Open MPI Project is an open source MPI-3 implementation."""
