@@ -107,7 +107,17 @@ local function CustomRepo(workspace)
 end
 
 local function generalVars(ws_dir)
+  -- SINGULARITY
   setenv('SINGULARITY_BINDPATH', ws_dir..':'..ws_dir)
+
+  -- Python package support
+  if (isloaded('Anaconda3') or isloaded('Python')) then
+    local pyver = subprocess("python -c \\\"import sys;print('{}.{}'.format(sys.version_info.major,sys.version_info.minor))\\\" ")
+    pypackpath = pathJoin(ws_dir, 'PyPackages')
+    prepend_path('PYTHONPACKAGEPATH', pypackpath)
+    prepend_path('PYTHONPATH', pathJoin(pypackpath,'lib','python'..pyver, 'site-packages'))
+    prepend_path('PATH', pathJoin(pypackpath,'bin'))
+  end
 end
 
 local function setHome()
@@ -227,10 +237,13 @@ local function findAndSetWS()
                   tempList)
     else
       -- no workspace available
-      LmodMessage('There are no workspaces detected for you, ',
-                  'if you already have one, please contact support.'..newline..
-                  'If you want to use your $HOME instead, please load '..name..'/home')
-      execute {cmd="module unload "..name,modeA={"load"}}
+      if (mode() == 'load') then
+          LmodMessage('There are no workspaces detected for you, ',
+                      'if you already have one, please contact support.'..newline..
+                      'If you want to use your $HOME instead, please load '..newline..
+                      '   '..'module load '..name..'/home')
+          execute {cmd="module unload "..name,modeA={"load"}}
+      end
     end
   end
 end
