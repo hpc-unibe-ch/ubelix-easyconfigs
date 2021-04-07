@@ -28,7 +28,7 @@ Singularity:
 toolchain = SYSTEM
 #sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 sources = ['CustomRepo.tar.gz']
-checksums = ['65ef0ee9edb72e886cf0f82f5ba76b841a8b22c1e0fdbc2a07f9cc6c5b98f88d']
+checksums = ['69d15e2060a06715def960d43c18ff7b2bc6830210bcee6da8c93ff8624c7f3e']
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'rm home.lua; '
