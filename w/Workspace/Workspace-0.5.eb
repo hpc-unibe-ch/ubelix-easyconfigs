@@ -126,7 +126,9 @@ local function setHome()
   setenv('WORKSPACE', path)
   setenv('SCRATCH',   pathJoin(scratchDir, 'users', user))
   CustomRepo(path)
-  LmodMessage('Workspace environment set for HOME:'..user)
+  if (mode() == 'load') then
+    LmodMessage('Workspace environment set for HOME:'..user)
+  end
   generalVars(path)
 end
 
