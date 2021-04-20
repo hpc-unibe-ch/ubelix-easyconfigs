@@ -88,9 +88,6 @@ local function CustomRepo(workspace)
   -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
   append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
 
-  r_path = pathJoin(base, 'R_packages')
-  setenv('R_LIBS', r_path)
-
   -- for custom architecture dependent repo
   EASYBUILD_PREFIX = pathJoin(wsSW, arch, 'easybuild')
   setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
@@ -106,9 +103,13 @@ local function CustomRepo(workspace)
   setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, 'generic.el7', 'modulefiles'))
 end
 
-local function generalVars(ws_dir)
+local function generalVars(ws_dir, scr_dir)
+  -- env vars
+  setenv('WORKSPACE', ws_dir)
+  setenv('SCRATCH', scr_dir)
+
   -- SINGULARITY
-  setenv('SINGULARITY_BINDPATH', ws_dir..':'..ws_dir)
+  setenv('SINGULARITY_BINDPATH', ws_dir..','..scr_dir)
 
   -- Python package support
   if (isloaded('Anaconda3') or isloaded('Python')) then
@@ -117,28 +118,31 @@ local function generalVars(ws_dir)
     prepend_path('PYTHONPACKAGEPATH', pypackpath)
     prepend_path('PYTHONPATH', pathJoin(pypackpath,'lib','python'..pyver, 'site-packages'))
     prepend_path('PATH', pathJoin(pypackpath,'bin'))
+    setenv('CONDA_ENVS_PATH', pathJoin(ws_dir, '.conda'))
   end
+
+  -- R packages
+  local rpackpath = pathJoin(ws_dir, 'RPackages')
+  setenv('R_LIBS', rpackpath)
 end
 
 local function setHome()
-  local path = pathJoin(os.getenv('HOME'))
+  local ws_path = pathJoin(os.getenv('HOME'))
+  local scr_path = pathJoin(scratchDir, 'users', user)
   local user = os.getenv('USER')
-  setenv('WORKSPACE', path)
-  setenv('SCRATCH',   pathJoin(scratchDir, 'users', user))
-  CustomRepo(path)
+  CustomRepo(ws_path)
   if (mode() == 'load') then
     LmodMessage('Workspace environment set for HOME:'..user)
   end
-  generalVars(path)
+  generalVars(ws_path, scr_path)
 end
 
 local function setWorkspace(ws)
   local wsDir, rg, wsName = unpack(ws)
   local workspace = pathJoin(wsDir, rg, wsName)
+  local scr = pathJoin(scratchDir, rg, wsName)
   -- easy access to spaces
-  setenv('WORKSPACE', workspace)
-  setenv('SCRATCH',   pathJoin(scratchDir, rg, wsName))
-  generalVars(workspace)
+  generalVars(workspace, scr)
 
   -- SLURM accounting
   setenv('SBATCH_ACCOUNT', wsName)
