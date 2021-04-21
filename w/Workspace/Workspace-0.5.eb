@@ -32,6 +32,7 @@ checksums = ['69d15e2060a06715def960d43c18ff7b2bc6830210bcee6da8c93ff8624c7f3e']
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'rm home.lua; '
+                    'ln -s %(version)s.lua debug.lua ;'
                     'ln -s %(version)s.lua home.lua ']
 
 modextrapaths = {'PATH': ''}
@@ -191,7 +192,7 @@ local function getWorkspaces(ws_name)
     local dirs = subprocess('find '..search..' -maxdepth 1 2> /dev/null ')
     dirs = string.gsub(dirs, newline, ' ')
 
-    regex=wsDir..'([%a%p]+)/([%a%p]+)/'..ws_identifier
+    regex=wsDir..'([%a%p%d]+)/([%a%p%d]+)/'..ws_identifier
     for rg,ws in string.gmatch(dirs, regex) do
       table.insert(t, {wsDir, rg, ws})
       ws_count = ws_count+1
