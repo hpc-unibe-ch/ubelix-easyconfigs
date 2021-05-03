@@ -129,8 +129,8 @@ end
 
 local function setHome()
   local ws_path = pathJoin(os.getenv('HOME'))
-  local scr_path = pathJoin(scratchDir, 'users', user)
   local user = os.getenv('USER')
+  local scr_path = pathJoin(scratchDir, 'users', user)
   CustomRepo(ws_path)
   if (mode() == 'load') then
     LmodMessage('Workspace environment set for HOME:'..user)
