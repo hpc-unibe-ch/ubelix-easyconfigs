@@ -14,7 +14,7 @@ For using the custom repository only this module needs to be loaded."""
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['2e51163ed83aa8e53c4dca0b82460aff979c43d848b7d53c9550e08b7b6df1b0']
+checksums = ['4e958590ae42084c6d385ea0116546292f904e592d2aed26b2ab6ddf39a8a958']
 
 #builddependencies = [('EasyBuild', '4.0.1')]
 
