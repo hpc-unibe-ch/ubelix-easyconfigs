@@ -68,7 +68,7 @@ local function CustomRepo(workspace)
         arch = 'ivybridge.el7'
   elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
         arch = 'broadwell.el7'
-  elseif (arch_typ == 'btver2' or arch_typ == 'amd') then
+  elseif (arch_typ == 'btver2' or arch_typ == 'znver1' or arch_typ == 'znver2' or arch_typ == 'znver3' or arch_typ == 'amd') then
         arch = 'epyc2.el7'
   else
         LmodMessage('Warning: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' ..
