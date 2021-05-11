@@ -134,8 +134,6 @@ local function setHome()
   CustomRepo(ws_path)
   if (mode() == 'load') then
     LmodMessage('Workspace environment set for HOME:'..user)
-  else
-    unsetenv('HPC_WORKSPACE')
   end
   generalVars(ws_path, scr_path)
 end
@@ -166,8 +164,8 @@ local function setWorkspace(ws)
   if (mode() == 'load') then
     LmodMessage('Workspace environment set for:'..newline..'   '..workspace)
   elseif (mode() == 'unload') then
+    execute{cmd="unset HPC_WORKSPACE",modeA={"unload"}}
     unsetenv('WORKSPACE_PRELOAD_UMASK')
-    unsetenv('HPC_WORKSPACE')
   end
 end
 
