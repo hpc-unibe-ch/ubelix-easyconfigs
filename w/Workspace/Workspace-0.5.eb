@@ -229,21 +229,23 @@ local function findAndSetWS()
     if ( ws_count == 1 ) then
        setWorkspace(ws[1])
     elseif (ws_count > 1) then
-    -- if multiple workspaces available, list then
-    --   list only Workspace name, not researchGroup
-      local wsList = ''
-      local tempList = ''
-      for i, locDir in ipairs(ws) do
-        loc, rg, ws = unpack(locDir)
-        wsList=wsList..ws..', '
-        temp='export '..WS_VAR..'='..ws..'; module load '..name
-        tempList=tempList..'   '..temp..newline
+      if (mode() == 'load') then
+        -- if multiple workspaces available, list then
+        --   list only Workspace name, not researchGroup
+        local wsList = ''
+        local tempList = ''
+        for i, locDir in ipairs(ws) do
+          loc, rg, ws = unpack(locDir)
+          wsList=wsList..ws..', '
+          temp='export '..WS_VAR..'='..ws..'; module load '..name
+          tempList=tempList..'   '..temp..newline
+        end
+        LmodMessage('Workspaces are available: '..newline,
+                    '   ', wsList, newline,
+                    'Please select and load ONE of the following: '..newline,
+                    tempList)
+        execute {cmd="module unload "..name,modeA={"load"}}
       end
-      LmodMessage('Workspaces are available: '..newline,
-                  '   ', wsList, newline,
-                  'Please select and load ONE of the following: '..newline,
-                  tempList)
-      execute {cmd="module unload "..name,modeA={"load"}}
     else
       -- no workspace available
       if (mode() == 'load') then
