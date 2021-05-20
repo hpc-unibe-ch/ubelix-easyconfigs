@@ -52,7 +52,7 @@ postinstallcmds = [
         ,
         local_prep_env + "pip install pyspark==2.4.3",
         # necessary to enable widgets
-        '%(installdir)s/bin/jupyter labextension install @jupyter-widgets/jupyterlab-manager'
+#        '%(installdir)s/bin/jupyter labextension install @jupyter-widgets/jupyterlab-manager'
 
 ]
 exts_defaultclass = 'PythonPackage'
