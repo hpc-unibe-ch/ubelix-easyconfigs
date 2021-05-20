@@ -1,0 +1,71 @@
+# Mandes Schoenherr (UniBE)
+#  build process may need to be done directly on the node, within a slurm job,
+#  we got the error "RuntimeError: npm dependencies failed to install” in the widget install (on anode)
+
+easyblock = 'EB_Anaconda'
+
+name = 'Anaconda3'
+version = '2021.05'
+
+homepage = 'https://www.continuum.io/anaconda-overview'
+description = """Built to complement the rich, open source Python community,
+the Anaconda platform provides an enterprise-ready data analytics platform 
+that empowers companies to adopt a modern open data science analytics architecture.
+"""
+
+toolchain = {'name': 'foss', 'version': '2020b'}
+
+source_urls = ['https://repo.anaconda.com/archive/']
+sources = ['%(name)s-%(version)s-Linux-x86_64.sh']
+
+dependencies = [
+              # ('Mesa', '18.3.4', '', ('GCCcore', '7.4.0')),
+                ('HDF5', '1.10.7', '', ('gompi', '2020b')),
+                ('zlib', '1.2.11','', True),
+             ]
+hiddendependencies = [
+                ('zlib', '1.2.11','', True),
+        ]
+builddependencies = [
+              ('nodejs', '12.16.1','',('GCCcore','8.3.0')), # necessary for widgets
+              ]
+
+# Use only single thread by default to avoid accidental oversubscription
+modextravars = {'MKL_NUM_THREADS': '1'}
+patches = [('Anaconda_jupyter_computeNode.patch',0),
+           ('Anaconda_R.patch', 0), 
+#           ('Anaconda_Spark.patch',0)
+]
+local_prep_env = "PATH=%(installdir)s/bin:$PATH "
+postinstallcmds = [
+        # tool for portforwarding to compute nodes for Jupyter lab
+        'cp %(builddir)s/jupyter-compute %(installdir)s/bin/jupyter-compute;'
+        'cp %(builddir)s/jupyter_remote_port_forward %(installdir)s/bin/jupyter_remote_port_forward;'
+        'chmod +x %(installdir)s/bin/jupyter-compute;'
+        'chmod +x %(installdir)s/bin/jupyter_remote_port_forward;'
+        # R kernel
+        'mkdir %(installdir)s/share/jupyter/kernels/r; '
+        'cp %(builddir)s/r_kernel.json %(installdir)s/share/jupyter/kernels/r/kernel.json;'
+        # pyspark kernel
+#       'mkdir %(installdir)s/share/jupyter/kernels/pyspark; '
+#        'cp %(builddir)s/spark_kernel.json %(installdir)s/share/jupyter/kernels/pyspark/kernel.json;'
+        ,
+        local_prep_env + "pip install pyspark==2.4.3",
+        # necessary to enable widgets
+        '%(installdir)s/bin/jupyter labextension install @jupyter-widgets/jupyterlab-manager'
+
+]
+exts_defaultclass = 'PythonPackage'
+exts_filter = ("python", "import %(ext_name)s")
+
+#exts_list = [
+#    ('pyspark', '2.4.3', { # for using spark in python
+#        'source_urls': ['https://pypi.python.org/packages/source/p/pyspark'],
+#    }),
+##    ('mpi4py', '3.0.1', {
+##        'source_urls': ['https://pypi.python.org/packages/source/m/mpi4py/'],
+##    }),
+#]
+
+moduleclass = 'lang'
+
