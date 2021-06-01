@@ -3,7 +3,7 @@
 easyblock = 'Tarball'
 
 name = 'Workspace'
-version = '0.9'
+version = '0.9_test'
 
 homepage = 'https://hpc-unibe-ch.github.io/hpc-workspaces/environment.html'
 description = """UniBE HPC Workspace module for easy access to data and custom Sorftware of an specific HPC workspace.
@@ -41,6 +41,7 @@ modluafooter = """
 local workspaceDirs='/storage/workspaces/'
 local scratchDir='/storage/scratch/'
 local ws_identifier='.WSinfo'
+local ws_primGrp_identifier='.usage.txt'
 
 local WS_VAR='HPC_WORKSPACE'
 
@@ -138,7 +139,18 @@ local function setHome()
   generalVars(ws_path, scr_path)
 end
 
+function file_check(file_name)
+  local file_found=io.open(file_name, "r")
+  if file_found==nil then
+    file_found=false
+  else
+    file_found=true
+  end
+  return file_found
+end
+
 local function setWorkspace(ws)
+  -- vars
   local wsDir, rg, wsName = unpack(ws)
   local workspace = pathJoin(wsDir, rg, wsName)
   local scr = pathJoin(scratchDir, rg, wsName)
@@ -146,9 +158,12 @@ local function setWorkspace(ws)
   generalVars(workspace, scr)
 
   -- SLURM accounting
-  setenv('SBATCH_ACCOUNT', wsName)
-  setenv('SALLOC_ACCOUNT', wsName)
-  setenv('SLURM_ACCOUNT', wsName)
+  -- -- only for prim group
+  if file_check(pathJoin(workspace,ws_primGrp_identifier)) then
+    setenv('SBATCH_ACCOUNT', wsName)
+    setenv('SALLOC_ACCOUNT', wsName)
+    setenv('SLURM_ACCOUNT', wsName)
+  end
 
   -- Custom SW repo
   CustomRepo(workspace)
