@@ -1,0 +1,115 @@
+# patch created using 
+# diff -uN /dev/null pvserver-parallel > pvserver-parallel.patch
+--- /dev/null	2021-05-04 05:38:22.190000221 +0200
++++ pvserver-parallel	2021-06-10 08:33:00.519942000 +0200
+@@ -0,0 +1,110 @@
++#!/bin/env bash
++# UniBE 2021
++# this tool provides portforwarding from the submitted node to the compute node and
++# starts jParaView Server
++#  mandes.schoenherr@id.unibe.ch
++
++# taking first argument as port number, or this default
++port=${1:-15051}
++shift
++
++qos="--qos=job_interactive"
++
++while test $# -gt 0; do
++  case "$1" in
++    -h|--help)
++      echo "UniBE HPC tools:"
++      echo "ParaView wrapper to launch ParaView server and establish reverse port forwarding back to submit node."
++      echo " "
++      echo -e " usage: $0 port [options] [paraview options]"
++      echo " "
++      echo -e " options:"
++      echo -e "\tport                              needs to be a unique number "
++      echo -e "                                    (not used again on related nodes) "
++      echo -e "                                    between 2000 and 65000"
++      echo -e "\t-h, --help                        show brief help"
++      echo -e "\t --no-qos                         disable special QOS"
++      echo -e "\t--slurm-args='--time=00:10:00'    additional slurm arguments, e.g. walltime 10min"
++      echo -e " For ParaView options run: pvserver --help "
++      echo -e " For question, issues, and comments please file a ticket at serviceportal.unibe.ch/hpc"
++      exit 0
++      ;;
++    --slurm-args*)
++      slurm_args="`echo $1 | sed -e 's/^[^=]*=//g'`"
++      shift
++      ;;
++    --no-qos)
++      qos=""
++      shift
++      ;;
++    *)
++      pv_args="$pv_args $1"
++      shift
++      ;;
++  esac
++done
++
++# get modules needed on the compute node and reload them on the compute node
++#module save EB_INSTALL_ALL_TMP
++modules=$(module -t list 2>&1 | sed ':a;N;$!ba;s/\n/ /g')
++if [ ! -z $HPC_WORKSPACE ]; then
++   proj_id="export HPC_WORKSPACE=$HPC_WORKSPACE"
++fi
++
++### template job script
++cat > job_pv_temporary_script.sl << EOF
++#!/bin/bash
++#SBATCH --job-name="ParaView"
++#SBATCH --partition=epyc2 ## gpu
++#SBATCH --time=01:00:00
++#SBATCH --ntasks=1
++#SBATCH --output="paraView-%j.out"
++
++module purge
++$proj_id
++module load $modules
++module list
++
++ssh -N -R ${port}:localhost:${port} \$SLURM_SUBMIT_HOST &
++
++srun pvserver --force-offscreen-rendering --server-port=${port} $pv_args
++EOF
++
++
++note(){
++echo "ParaView remote Server submitted to compute nodes"
++echo "  when finished please kill the server using: "
++echo "     scancel $jid"
++}
++
++## submit job
++echo "sbatch $slurm_args --parsable job_pv_temporary_script.sl"
++jid=$(sbatch $slurm_args --parsable job_pv_temporary_script.sl)
++note
++echo "job $jid status:"
++queueing=true
++header=''
++rm job_pv_temporary_script.sl
++
++while $queueing; do
++   cmd="squeue --job $jid $header --format='%.8i%.11P%.9T%.25S'"
++   sq=$( $cmd )
++   header='--noheader'
++   #state=$(echo $sq | awk '{if($4 != "STATE"){print $4}}')
++   state=$(echo $sq | awk '{print $4}')
++   if [ "$state" = "" ]; then
++      queueing=false
++      echo "ERROR: job dshed or died already. Please see slurm output file: paraView-${jid}.out"
++      exit
++   fi
++   if [ "$state" = "RUNNING" ]; then 
++      queueing=false
++   else
++      echo "${sq//\'/}"
++      sleep 20
++   fi
++done
++echo "pvserver ready to connect on port ${port}."
++echo "When finished, please stop ParaView Server using"
++echo " scancel $jid"
++

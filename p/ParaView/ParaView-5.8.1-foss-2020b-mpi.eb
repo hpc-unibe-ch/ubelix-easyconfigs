@@ -13,7 +13,17 @@ toolchainopts = {'pic': True, 'usempi': True}
 local_download_suffix = 'download.php?submit=Download&version=v%(version_major_minor)s&type=source&os=all&downloadFile='
 source_urls = ['https://www.paraview.org/paraview-downloads/%s' % local_download_suffix]
 sources = ["ParaView-v%(version)s.tar.xz"]
-checksums = ['7653950392a0d7c0287c26f1d3a25cdbaa11baa7524b0af0e6a1a0d7d487d034']
+patches = [( 'pvserver-parallel.patch', 0)]
+checksums = [
+    '7653950392a0d7c0287c26f1d3a25cdbaa11baa7524b0af0e6a1a0d7d487d034',  # ParaView-v5.8.1.tar.xz
+    '71b7cf85e304e771aabc3c64733b59122cd1c3ed54beb1f0c5bb5602c5e6087c',  # pvserver-parallel.patch
+]
+
+postinstallcmds = [
+    # tool for portforwarding to compute nodes
+    'cp %(builddir)s/pvserver-parallel %(installdir)s/bin/pvserver-parallel;'
+    'chmod +x %(installdir)s/bin/pvserver-parallel;'
+]
 
 dependencies = [
     ('Python', '3.8.6'),
