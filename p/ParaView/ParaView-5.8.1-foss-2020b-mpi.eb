@@ -19,6 +19,12 @@ checksums = [
     '71b7cf85e304e771aabc3c64733b59122cd1c3ed54beb1f0c5bb5602c5e6087c',  # pvserver-parallel.patch
 ]
 
+# setting the OpenGL version for ParaView, unfortunately ParaView crashes otherwise with
+#[paraview        ]   vtkShaderProgram.cxx:453    ERR| vtkShaderProgram (0x98c75a0): 0:143(45): error: `gl_PrimitiveID' undeclared
+# 0:143(45): error: operands to arithmetic operators must be numeric
+# 0:143(18): error: no function with name 'texelFetchBuffer'
+modextravars = { 'MESA_GL_VERSION_OVERRIDE': '4.5' }
+
 postinstallcmds = [
     # tool for portforwarding to compute nodes
     'cp %(builddir)s/pvserver-parallel %(installdir)s/bin/pvserver-parallel;'
