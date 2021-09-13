@@ -28,7 +28,7 @@ Singularity:
 toolchain = SYSTEM
 #sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 sources = ['CustomRepo.tar.gz']
-checksums = ['4c8e0cc2465fdcb0399470c7dc7a6a803e10d52c272321d0023d9c456de3e0e2']
+checksums = ['073bd1fb7b68c46f970ec372f87e31cc59307506085b6ab695fc63fffca31536']
 
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'rm home.lua; '
@@ -51,6 +51,20 @@ local name = myModuleName()
 local version = myModuleVersion()
 local newline = '\\\n'
 conflict(name)
+
+### l_easybuild user just need custom repo variables for eb-install tool
+local function setleasybuild()
+    -- standard variables not necessary for global installation
+    -- settings for generic software stack
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
+    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(global_base_generic,
+'modulefiles'))
+    -- provide hooks
+    if ebver == nil then
+       LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' ..
+version )
+    end
+end
 
 local function CustomRepo(workspace)
   local wsSW = pathJoin(workspace, 'Software')
@@ -275,7 +289,9 @@ local function findAndSetWS()
 end
 
 -- main with determing the workspace
-if version == 'home' then
+if (os.getenv('USER') == 'l_easybuild') then
+  setleasybuild()
+elseif version == 'home' then
   setHome()
 else
   findAndSetWS()
