@@ -50,6 +50,9 @@ fallback_arch='sandybridge.el7'
 local name = myModuleName()
 local version = myModuleVersion()
 local newline = '\\\n'
+
+local global_base_generic = '/storage/software/generic.el7'
+
 conflict(name)
 
 -- l_easybuild user just need custom repo variables for eb-install tool
@@ -60,16 +63,17 @@ local function setleasybuild()
     setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(global_base_generic,
 'modulefiles'))
     -- provide hooks
-    if ebver == nil then
-       LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' ..
-version )
+    --if ebver == nil then -- issues with installing
+    --   LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
+    --end
+    if not isloaded("EasyBuild") then
+        load("EasyBuild")
     end
 end
 
 local function CustomRepo(workspace)
   local wsSW = pathJoin(workspace, 'Software')
   local global_base = '/software.el7'
-  local global_base_generic = '/storage/software/generic.el7'
   local EB_base = os.getenv('EBROOTEASYBUILD')
 
   prepend_path("MODULEPATH", pathJoin(workspace, 'modulefiles'))
