@@ -52,7 +52,7 @@ local version = myModuleVersion()
 local newline = '\\\n'
 conflict(name)
 
-### l_easybuild user just need custom repo variables for eb-install tool
+-- l_easybuild user just need custom repo variables for eb-install tool
 local function setleasybuild()
     -- standard variables not necessary for global installation
     -- settings for generic software stack
