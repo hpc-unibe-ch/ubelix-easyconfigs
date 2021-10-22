@@ -184,9 +184,9 @@ local function homeDirs()
   local ws_path = pathJoin(os.getenv('HOME'))
   local user = os.getenv('USER')
   local scr_path = pathJoin(scratchDir, 'users', user)
-  if (mode() == 'load') then
-    LmodMessage('Workspace environment set for HOME:'..user)
-  end
+--  if (mode() == 'load') then
+--    LmodMessage('Workspace environment set for HOME:'..user)
+--  end
   return ws_path, scr_path
 end
 
@@ -363,6 +363,11 @@ elseif name == mod_name_ws then
   if mode() == 'unload' then
     WS_name = os.getenv(WS_VAR_LOAD)
   end
+  -- if reload, we don't want to show list again
+  if mode() == 'load' and not(isempty(os.getenv(WS_VAR_LOAD))) then
+    return
+  end
+
   local ws = findWS(WS_name)
   if isempty(ws) then
     return
