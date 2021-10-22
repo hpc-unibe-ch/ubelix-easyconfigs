@@ -1,0 +1,362 @@
+# author: # Mandes Schönherr (mandes.schoenherr@unibe.ch) mand35@github
+# in casses of issues or feature request write UniBe HPC support
+easyblock = 'Tarball'
+
+name = 'Workspace'
+version = '1.1'
+
+homepage = 'https://hpc-unibe-ch.github.io/hpc-workspaces/environment.html'
+description = """UniBE HPC Workspace module for easy access to data and custom Sorftware of an specific HPC workspace.
+The modules searches available Workspaces and loades the `the one you belong to` or provides choices, if more than one are available for you.
+
+When loaded it provides:
+- environment variables to WORKSPACE and related SCRATCH space
+- sets umask for group writeable files/directories
+- workspace software stack (see below)
+- workspace SLURM account
+
+Custom Software Stack:
+- to INSTALL new package with Easybuild load `module load Easybuild` and use
+  `eb_install_all` for installing package for each CPU architecture OR
+  `eb_install_generic` for installing a architecture independent package.
+- installed packages should be automatically available after loading this Workspace module
+  - including Python and R packages
+
+Singularity:
+- sets SINGULARITY_BINDPATH to the Workspace directory
+"""
+
+toolchain = SYSTEM
+#sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
+sources = ['CustomRepo.tar.gz']
+checksums = ['4e4181d99dfd48a146a64ee9bf6ad67b73991b1d324fd8ad7112753fdfd52f0b']
+
+mod_name_home = 'home'
+
+# global installation has different directory structure. There need to go 3 levels up
+## while in the CustomRepo, there are 4 levels
+# additionally create a module for SW stacks
+postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
+                    'rm home.lua debug.lua; '
+                    'ln -s %(version)s.lua debug.lua ;'
+                    'ln -s %(version)s.lua home.lua ;'
+                    'mkdir -p ../Workspace_SW_only/;'
+                    'cd ../Workspace_SW_only/;'
+                    'rm %(version)s.lua;'
+                    'ln -s ../%(name)s/%(version)s.lua %(version)s.lua']
+
+modextrapaths = {'PATH': ''}
+
+modluafooter = """
+local mod_name_home = 'home'
+local mod_name_sw_ro = 'Workspace_SW_only'
+local workspaceRoot='/storage/workspaces/'
+local scratchDir='/storage/scratch/'
+local ws_identifier='.WSinfo'
+local ws_primGrp_identifier='.usage.txt'
+
+local WS_VAR='HPC_WORKSPACE'
+
+fallback_arch='sandybridge.el7'
+
+local name = myModuleName()
+local version = myModuleVersion()
+local newline = '\\\n'
+
+local global_base_generic = '/storage/software/generic.el7'
+
+-- TODO conflict(name)
+
+-- l_easybuild user just need custom repo variables for eb-install tool
+local function setleasybuild()
+    -- standard variables not necessary for global installation
+    -- settings for generic software stack
+    setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
+    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(global_base_generic,
+'modulefiles'))
+    -- provide hooks
+    --if ebver == nil then -- issues with installing
+    --   LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
+    --end
+    if not isloaded("EasyBuild") then
+        load("EasyBuild")
+    end
+end
+
+local function getArch()
+  -- distinguish different software stacks
+  local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
+  arch_typ = arch_typ:gsub(newline, "")
+  local arch = ''
+  if ( arch_typ == 'corei7-avx' or arch_typ == 'sandybridge') then
+        arch = 'sandybridge.el7'
+  elseif ( arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
+        arch = 'ivybridge.el7'
+  elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
+        arch = 'broadwell.el7'
+  elseif (arch_typ == 'btver2' or arch_typ == 'znver1' or arch_typ == 'znver2' or arch_typ == 'znver3' or arch_typ == 'amd') then
+        arch = 'epyc2.el7'
+  else
+        LmodMessage('Warning: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' ..
+                  arch_typ .. ', please contact support. ')
+        arch = fallback_arch
+  end
+  return arch
+end
+
+local function varInstallSW(workspace)
+  local wsSW = pathJoin(workspace, 'Software')
+  local global_base = '/software.el7'
+  local EB_base = os.getenv('EBROOTEASYBUILD')
+
+  local arch = getArch()
+
+  ebver = os.getenv('EBVERSIONEASYBUILD')
+  if not (ebver == nil) then
+    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
+  end
+
+  -- Don't warn for this and Easybuild module during eb process
+  modules = 'EasyBuild,' .. name
+  setenv('EASYBUILD_ALLOW_LOADED_MODULES', modules)
+  setenv('EASYBUILD_DETECT_LOADED_MODULES', 'warn')
+
+  -- Note: EASYBUILD_PREFIX implicitly sets EASYBUILD_BUILDPATH,
+  -- EASYBUILD_SOURCEPATH and EASYBUILD_INSTALLPATH unless these are overridden
+  append_path('EASYBUILD_SOURCEPATH', pathJoin(global_base, 'sources'))
+
+  -- for custom architecture dependent repo
+  EASYBUILD_PREFIX = pathJoin(wsSW, arch, 'easybuild')
+  setenv('EASYBUILD_PREFIX', EASYBUILD_PREFIX)
+  setenv('EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, arch, 'modulefiles'))
+  prepend_path('EASYBUILD_SOURCEPATH', pathJoin(wsSW, 'sources'))
+  --setenv('EASYBUILD_PACKAGEPATH', pathJoin(EASYBUILD_PREFIX, 'easybuild-resources', 'packages'))
+
+  -- for custom generic repo
+  GENERIC_EASYBUILD_PREFIX = pathJoin(wsSW, 'generic.el7', 'easybuild')
+  setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', GENERIC_EASYBUILD_PREFIX)
+  setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, 'generic.el7', 'modulefiles'))
+end
+
+-- additional software locations like Python or R
+local function varUseSW(ws_dir)
+  -- module paths
+  prepend_path("MODULEPATH", pathJoin(ws_dir, 'modulefiles'))
+  local arch = getArch()
+  prepend_path('MODULEPATH', pathJoin(ws_dir, 'Software', arch, 'modulefiles', 'all'))
+  prepend_path('MODULEPATH', pathJoin(ws_dir, 'Software', 'generic.el7', 'modulefiles', 'all'))
+
+  -- Python package support
+  if (isloaded('Anaconda3') or isloaded('Python')) then
+    local pyver = subprocess("python -c \\\"import sys;print('{}.{}'.format(sys.version_info.major,sys.version_info.minor))\\\" ")
+    pypackpath = pathJoin(ws_dir, 'PyPackages')
+    prepend_path('PYTHONPACKAGEPATH', pypackpath)
+    prepend_path('PYTHONPATH', pathJoin(pypackpath,'lib','python'..pyver, 'site-packages'))
+    prepend_path('PATH', pathJoin(pypackpath,'bin'))
+    prepend_path('CONDA_ENVS_PATH', pathJoin(ws_dir, '.conda'))
+  end
+
+  -- R packages
+  local rpackpath = pathJoin(ws_dir, 'RPackages')
+  prepend_path('R_LIBS', rpackpath)
+end
+
+local function generalVars(ws_dir, scr_dir)
+  -- env vars
+  setenv('WORKSPACE', ws_dir)
+  setenv('SCRATCH', scr_dir)
+
+  -- SINGULARITY
+  setenv('SINGULARITY_BINDPATH', ws_dir..','..scr_dir)
+
+end
+
+local function homeDirs()
+  local ws_path = pathJoin(os.getenv('HOME'))
+  local user = os.getenv('USER')
+  local scr_path = pathJoin(scratchDir, 'users', user)
+  if (mode() == 'load') then
+    LmodMessage('Workspace environment set for HOME:'..user)
+  end
+  return ws_path, scr_path
+end
+
+function file_check(file_name)
+  local file_found=io.open(file_name, "r")
+  if file_found==nil then
+    file_found=false
+  else
+    file_found=true
+  end
+  return file_found
+end
+
+local function workspaceDirs(ws)
+  -- vars
+  local wsDir, rg, wsName = unpack(ws)
+  local workspace = pathJoin(wsDir, rg, wsName)
+  local scr = pathJoin(scratchDir, rg, wsName)
+  return workspace, scr
+end
+
+local function setWorkspace(ws)
+  -- vars
+  local wsDir, rg, wsName = unpack(ws)
+  local workspace = pathJoin(wsDir, rg, wsName)
+  -- SLURM accounting
+  -- -- only for prim group
+  if file_check(pathJoin(workspace,ws_primGrp_identifier)) then
+    setenv('SBATCH_ACCOUNT', wsName)
+    setenv('SALLOC_ACCOUNT', wsName)
+    setenv('SLURM_ACCOUNT', wsName)
+  end
+
+  -- set umask
+  local gumask = os.getenv('WORKSPACE_PRELOAD_UMASK')
+  if gumask == nil then
+    gumask = subprocess("umask")
+  end
+  execute{cmd="umask "..gumask, modeA={"unload"}}
+  execute{cmd="umask 002", modeA={"load"}}
+  setenv('WORKSPACE_PRELOAD_UMASK', gumask)
+  if (mode() == 'load') then
+    LmodMessage('Workspace environment set for:'..newline..'   '..workspace)
+  elseif (mode() == 'unload') then
+    execute{cmd="unset HPC_WORKSPACE",modeA={"unload"}}
+    unsetenv('WORKSPACE_PRELOAD_UMASK')
+  end
+end
+
+local function WorkspaceAccess(ws)
+  local code, out = subprocess('find '..ws..'/ -maxdepth 0 -type f -perm -g=rx')
+  io.stderr:write('test dir: ', tostring(code), newline)
+  if code == 0 then
+    res = true
+  else
+    res = false
+  end
+  return res
+end
+
+local function getWorkspaces(ws_name)
+  if (ws_name == '' or ws_name == nil) then
+    ws_name = '*'
+  end
+  local t={}
+  local ws_count = 0
+  for wsDir in string.gmatch(workspaceRoot, '%S+') do
+    -- get all accessible workspaces in particular directory
+    --    or search for particular accessible workspace
+    local search=pathJoin(wsDir,'*',ws_name,ws_identifier)
+    local dirs = subprocess('find '..search..' -maxdepth 1 2> /dev/null ')
+    dirs = string.gsub(dirs, newline, ' ')
+
+    regex=wsDir..'([%a%p%d]+)/([%a%p%d]+)/'..ws_identifier
+    for rg,ws in string.gmatch(dirs, regex) do
+      table.insert(t, {wsDir, rg, ws})
+      ws_count = ws_count+1
+    end
+  end
+  return ws_count, t
+end
+
+local function isempty(s)
+  return s == nil or s == ''
+end
+
+local function findWS(var_ws)
+  ws_set = os.getenv(var_ws)
+
+  if ( not( isempty(ws_set) ) ) then
+    -- selected workspace
+    local count, ws = getWorkspaces(ws_set)
+    if count == 0 then
+      LmodError('The selected workspace ', var_ws, '=', ws_set,
+                ' is not available for you or does not exist')
+    elseif (count > 1) then
+      LmodError('There are multiple workspaces with that name ',
+                var_ws, '=', ws_set,'. This should not be the case, ',
+                'please contact support.')
+    end
+    return ws[1]
+  else
+
+    local ws_count, ws = getWorkspaces()
+    -- for single / selected Workspace
+    if ( ws_count == 1 ) then
+       return ws[1]
+    elseif (ws_count > 1) then
+      if (mode() == 'load') then
+        -- if multiple workspaces available, list then
+        --   list only Workspace name, not researchGroup
+        local wsList = ''
+        local tempList = ''
+        for i, locDir in ipairs(ws) do
+          loc, rg, ws = unpack(locDir)
+          wsList=wsList..ws..', '
+          temp='export '..var_ws..'='..ws..'; module load '..name
+          tempList=tempList..'   '..temp..newline
+        end
+        LmodMessage('Workspaces are available: '..newline,
+                    '   ', wsList, newline,
+                    'Please select and load ONE of the following: '..newline,
+                    tempList)
+        execute {cmd="module unload "..name,modeA={"load"}}
+      end
+    else
+      -- no workspace available
+      if (mode() == 'load') then
+          LmodMessage('There are no workspaces detected for you, ',
+                      'if you already have one, please contact support.'..newline..
+                      'If you want to use your $HOME instead, please load '..newline..
+                      '   '..'module load '..name..'/home')
+          execute {cmd="module unload "..name,modeA={"load"}}
+      end
+    end
+  end
+  return nil
+end
+
+-- main with determing the cases
+-- l_easybuild needs only variables for generic SW stack
+if (os.getenv('USER') == 'l_easybuild') then
+  setleasybuild()
+  return
+-- get directories
+elseif version == mod_name_home then
+  ws_path, scr_path = homeDirs()
+elseif name == mod_name_sw_ro then
+  if WS_VAR == os.getenv('HOME') then
+    ws_path, scr_path = homeDirs()
+  else
+    local ws = findWS(WS_VAR)
+    if isempty(ws) then
+      return
+    end
+    ws_path, scr_path = workspaceDirs(ws)
+  end
+else
+  local ws = findWS(WS_VAR)
+  if isempty(ws) then
+    return
+  end
+  ws_path, scr_path = workspaceDirs(ws)
+  setWorkspace(ws)
+end
+
+-- set the environment
+varUseSW(ws_path)
+if not(name == mod_name_sw_ro) then
+  varInstallSW(ws_path)
+  generalVars(ws_path, scr_path)
+end
+
+"""
+
+sanity_check_paths = {
+    'files': ['eb-install-all', 'eb-install-generic'],
+    'dirs': [''],
+}
+
+moduleclass = 'base'
+
