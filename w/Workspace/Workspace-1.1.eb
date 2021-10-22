@@ -36,7 +36,7 @@ checksums = ['d23eef7619c0356bcfa1f60c6f686ff2f7b1d09e9ff86ae4020ecdf4dc0858de']
 # global installation has different directory structure. There need to go 3 levels up
 ## while in the CustomRepo, there are 4 levels
 # additionally create a module for SW stacks
-postinstallcmds = ['cd %(installdir)s/../../../../modulefiles/all/%(name)s/; '
+postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'mkdir -p ../Workspace_Home/;'
                     'cd ../Workspace_Home/;'
                     'rm %(version)s.lua;'
