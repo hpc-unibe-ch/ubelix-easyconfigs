@@ -29,9 +29,7 @@ Singularity:
 toolchain = SYSTEM
 #sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 sources = ['CustomRepo.tar.gz']
-checksums = ['4e4181d99dfd48a146a64ee9bf6ad67b73991b1d324fd8ad7112753fdfd52f0b']
-
-mod_name_home = 'home'
+checksums = ['d23eef7619c0356bcfa1f60c6f686ff2f7b1d09e9ff86ae4020ecdf4dc0858de']
 
 # global installation has different directory structure. There need to go 3 levels up
 ## while in the CustomRepo, there are 4 levels
