@@ -33,8 +33,9 @@ toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
 checksums = ['d23eef7619c0356bcfa1f60c6f686ff2f7b1d09e9ff86ae4020ecdf4dc0858de']
 
-# global installation has different directory structure. There need to go 3 levels up
-## while in the CustomRepo, there are 4 levels
+# due to different directory structure
+## global installation need to go 3 levels up
+## while in the Custom case are 4 levels
 # additionally create a module for SW stacks
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'mkdir -p ../Workspace_Home/;'
@@ -55,8 +56,9 @@ modextrapaths = {'PATH': ''}
 modluafooter = """
 local mod_name_generic = 'Workspace_tools'
 local mod_name_ws = 'Workspace'
-local mod_name_home = 'Home'
+local mod_name_home = 'Workspace_Home'
 local mod_name_sw_ro = 'Workspace_SW_only'
+
 local workspaceRoot = '/storage/workspaces/'
 local scratchDir = '/storage/scratch/'
 local ws_identifier = '.WSinfo'
@@ -73,8 +75,6 @@ local version = myModuleVersion()
 local newline = '\\\n'
 
 local global_base_generic = '/storage/software/generic.el7'
-
--- TODO conflict(name)
 
 -- l_easybuild user just need custom repo variables for eb-install tool
 local function setleasybuild()
@@ -332,6 +332,9 @@ end
 
 WS_name = os.getenv(WS_VAR)
 unsetenv(WS_VAR)
+local ws_path = ''
+local scr_path = ''
+
 -- distinguish Cases
 -- -- HOME
 if name == mod_name_home then
@@ -355,6 +358,7 @@ elseif name == mod_name_sw_ro then
     setenv(WS_SW_VAR, wsName)
     ws_path, scr_path = workspaceDirs(ws)
   end
+-- -- WORKSPACE
 elseif name == mod_name_ws then
   if mode() == 'unload' then
     WS_name = os.getenv(WS_VAR_LOAD)
@@ -369,11 +373,13 @@ elseif name == mod_name_ws then
   -- prepare
   ws_path, scr_path = workspaceDirs(ws)
   setWorkspace(ws)
+-- -- Generic module
 elseif name == mod_name_generic then
   LmodMessage('This is a generic version, ',
           'please use one of the following Workspace modules: '..newline..
           mod_name_ws..' '..mod_name_sw_ro..' '..mod_name_home)
   return
+-- -- other cases
 else
   LmodError('Unknown module name "',name,'" for the Workspace tools')
 end
