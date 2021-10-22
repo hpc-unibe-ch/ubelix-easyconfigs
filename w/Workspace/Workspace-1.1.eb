@@ -2,8 +2,10 @@
 # in casses of issues or feature request write UniBe HPC support
 easyblock = 'Tarball'
 
-name = 'Workspace'
+name = 'Workspace_tools'
 version = '1.1'
+
+hidden = True
 
 homepage = 'https://hpc-unibe-ch.github.io/hpc-workspaces/environment.html'
 description = """UniBE HPC Workspace module for easy access to data and custom Sorftware of an specific HPC workspace.
@@ -34,28 +36,37 @@ checksums = ['d23eef7619c0356bcfa1f60c6f686ff2f7b1d09e9ff86ae4020ecdf4dc0858de']
 # global installation has different directory structure. There need to go 3 levels up
 ## while in the CustomRepo, there are 4 levels
 # additionally create a module for SW stacks
-postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
-                    'rm home.lua debug.lua; '
-                    'ln -s %(version)s.lua debug.lua ;'
-                    'ln -s %(version)s.lua home.lua ;'
+postinstallcmds = ['cd %(installdir)s/../../../../modulefiles/all/%(name)s/; '
+                    'mkdir -p ../Workspace_Home/;'
+                    'cd ../Workspace_Home/;'
+                    'rm %(version)s.lua;'
+                    'ln -s ../%(name)s/.%(version)s.lua %(version)s.lua;'
+                    'mkdir -p ../Workspace/;'
+                    'cd ../Workspace/;'
+                    'rm %(version)s.lua;'
+                    'ln -s ../%(name)s/.%(version)s.lua %(version)s.lua;'
                     'mkdir -p ../Workspace_SW_only/;'
                     'cd ../Workspace_SW_only/;'
                     'rm %(version)s.lua;'
-                    'ln -s ../%(name)s/%(version)s.lua %(version)s.lua']
+                    'ln -s ../%(name)s/.%(version)s.lua %(version)s.lua']
 
 modextrapaths = {'PATH': ''}
 
 modluafooter = """
-local mod_name_home = 'home'
+local mod_name_generic = 'Workspace_tools'
+local mod_name_ws = 'Workspace'
+local mod_name_home = 'Home'
 local mod_name_sw_ro = 'Workspace_SW_only'
-local workspaceRoot='/storage/workspaces/'
-local scratchDir='/storage/scratch/'
-local ws_identifier='.WSinfo'
-local ws_primGrp_identifier='.usage.txt'
+local workspaceRoot = '/storage/workspaces/'
+local scratchDir = '/storage/scratch/'
+local ws_identifier = '.WSinfo'
+local ws_primGrp_identifier = '.usage.txt'
 
-local WS_VAR='HPC_WORKSPACE'
+local WS_VAR = 'HPC_WORKSPACE'
+local WS_SW_VAR = 'HPC_WORKSPACE_SW_ONLY'
+local WS_VAR_LOAD = 'HPC_WORKSPACE_LOADED'
 
-fallback_arch='sandybridge.el7'
+fallback_arch = 'sandybridge.el7'
 
 local name = myModuleName()
 local version = myModuleVersion()
@@ -180,11 +191,11 @@ local function homeDirs()
 end
 
 function file_check(file_name)
-  local file_found=io.open(file_name, "r")
-  if file_found==nil then
-    file_found=false
+  local file_found = io.open(file_name, "r")
+  if file_found == nil then
+    file_found = false
   else
-    file_found=true
+    file_found = true
   end
   return file_found
 end
@@ -220,7 +231,6 @@ local function setWorkspace(ws)
   if (mode() == 'load') then
     LmodMessage('Workspace environment set for:'..newline..'   '..workspace)
   elseif (mode() == 'unload') then
-    execute{cmd="unset HPC_WORKSPACE",modeA={"unload"}}
     unsetenv('WORKSPACE_PRELOAD_UMASK')
   end
 end
@@ -240,7 +250,7 @@ local function getWorkspaces(ws_name)
   if (ws_name == '' or ws_name == nil) then
     ws_name = '*'
   end
-  local t={}
+  local t = {}
   local ws_count = 0
   for wsDir in string.gmatch(workspaceRoot, '%S+') do
     -- get all accessible workspaces in particular directory
@@ -262,18 +272,16 @@ local function isempty(s)
   return s == nil or s == ''
 end
 
-local function findWS(var_ws)
-  ws_set = os.getenv(var_ws)
-
+local function findWS(ws_set)
   if ( not( isempty(ws_set) ) ) then
     -- selected workspace
     local count, ws = getWorkspaces(ws_set)
     if count == 0 then
-      LmodError('The selected workspace ', var_ws, '=', ws_set,
-                ' is not available for you or does not exist')
+      LmodError('The selected workspace "', ws_set,
+                '" is not available for you or does not exist')
     elseif (count > 1) then
-      LmodError('There are multiple workspaces with that name ',
-                var_ws, '=', ws_set,'. This should not be the case, ',
+      LmodError('There are multiple workspaces with the name ',
+                ws_set,'. This should not be the case, ',
                 'please contact support.')
     end
     return ws[1]
@@ -292,7 +300,7 @@ local function findWS(var_ws)
         for i, locDir in ipairs(ws) do
           loc, rg, ws = unpack(locDir)
           wsList=wsList..ws..', '
-          temp='export '..var_ws..'='..ws..'; module load '..name
+          temp=WS_VAR..'='..ws..' module load '..name
           tempList=tempList..'   '..temp..newline
         end
         LmodMessage('Workspaces are available: '..newline,
@@ -320,26 +328,54 @@ end
 if (os.getenv('USER') == 'l_easybuild') then
   setleasybuild()
   return
--- get directories
-elseif version == mod_name_home then
+end
+
+WS_name = os.getenv(WS_VAR)
+unsetenv(WS_VAR)
+-- distinguish Cases
+-- -- HOME
+if name == mod_name_home then
   ws_path, scr_path = homeDirs()
+-- -- WOKRSPACE SW ONLY
 elseif name == mod_name_sw_ro then
-  if WS_VAR == os.getenv('HOME') then
+  -- read and set variables
+  local tmp_name = os.getenv(WS_SW_VAR)
+  if not(isempty(tmp_name)) then
+    WS_name = tmp_name
+  end
+  -- prepare
+  if WS_name == os.getenv('HOME') then
     ws_path, scr_path = homeDirs()
   else
-    local ws = findWS(WS_VAR)
+    local ws = findWS(WS_name)
     if isempty(ws) then
       return
     end
+    local wsDir, rg, wsName = unpack(ws)
+    setenv(WS_SW_VAR, wsName)
     ws_path, scr_path = workspaceDirs(ws)
   end
-else
-  local ws = findWS(WS_VAR)
+elseif name == mod_name_ws then
+  if mode() == 'unload' then
+    WS_name = os.getenv(WS_VAR_LOAD)
+  end
+  local ws = findWS(WS_name)
   if isempty(ws) then
     return
   end
+  local wsDir, rg, wsName = unpack(ws)
+  setenv(WS_VAR_LOAD, wsName)
+
+  -- prepare
   ws_path, scr_path = workspaceDirs(ws)
   setWorkspace(ws)
+elseif name == mod_name_generic then
+  LmodMessage('This is a generic version, ',
+          'please use one of the following Workspace modules: '..newline..
+          mod_name_ws..' '..mod_name_sw_ro..' '..mod_name_home)
+  return
+else
+  LmodError('Unknown module name "',name,'" for the Workspace tools')
 end
 
 -- set the environment
