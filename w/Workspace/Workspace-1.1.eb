@@ -1,5 +1,7 @@
 # author: # Mandes Schönherr (mandes.schoenherr@unibe.ch) mand35@github
 # in casses of issues or feature request write UniBe HPC support
+
+# please have a look to the TODO items down there
 easyblock = 'Tarball'
 
 name = 'Workspace_tools'
@@ -17,6 +19,12 @@ When loaded it provides:
 - workspace software stack (see below)
 - workspace SLURM account
 
+Additional software stack:
+The possibility exist to load a 'data' Workspace and an additional 'software' Workspace. The latter will only provide the software stack, no WORKSPACE, no SCRATCH, and no SLURM enviroment variables.
+Therefore you can load:
+HPC_WORKSPACE=data module load Workspace
+HPC_WORKSPACE=software module load Workspace_SW_only
+
 Custom Software Stack:
 - to INSTALL new package with Easybuild load `module load Easybuild` and use
   `eb_install_all` for installing package for each CPU architecture OR
@@ -29,14 +37,13 @@ Singularity:
 """
 
 toolchain = SYSTEM
-#sources = ['CustomRepo.tar.gz', 'ws_tools.tar.gz']
 sources = ['CustomRepo.tar.gz']
 checksums = ['d23eef7619c0356bcfa1f60c6f686ff2f7b1d09e9ff86ae4020ecdf4dc0858de']
 
-# due to different directory structure
+# create the actual Workspace module and additionally create modules for "software only" and "home", all of them are symlinks thus the one below is the only one to maintain.
+# TODO due to different directory structure of global and local SW stacks, you need to change the following first line when builing localy
 ## global installation need to go 3 levels up
-## while in the Custom case are 4 levels
-# additionally create a module for SW stacks
+## while in the Custom case are 4 levels up
 postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'mkdir -p ../Workspace_Home/;'
                     'cd ../Workspace_Home/;'
@@ -52,30 +59,35 @@ postinstallcmds = ['cd %(installdir)s/../../../modulefiles/all/%(name)s/; '
                     'ln -s ../%(name)s/.%(version)s.lua %(version)s.lua']
 
 modextrapaths = {'PATH': ''}
-
+# in the following the lua module file is provided, this we switch to lua syntax
+# following module names must match the above specified directory names
 modluafooter = """
+-- module names
 local mod_name_generic = 'Workspace_tools'
 local mod_name_ws = 'Workspace'
 local mod_name_home = 'Workspace_Home'
 local mod_name_sw_ro = 'Workspace_SW_only'
 
-local workspaceRoot = '/storage/workspaces/'
-local scratchDir = '/storage/scratch/'
-local ws_identifier = '.WSinfo'
-local ws_primGrp_identifier = '.usage.txt'
-
+-- environment variables names for specifying and storing the Workspace names
 local WS_VAR = 'HPC_WORKSPACE'
 local WS_SW_VAR = 'HPC_WORKSPACE_SW_ONLY'
 local WS_VAR_LOAD = 'HPC_WORKSPACE_LOADED'
 
-fallback_arch = 'sandybridge.el7'
+-- locations
+local workspaceRoot = '/storage/workspaces/'
+local scratchDir = '/storage/scratch/'
+local ws_identifier = '.WSinfo'
+local ws_primGrp_identifier = '.usage.txt'
+local global_base_generic = '/storage/software/generic.el7'
 
+fallback_arch = 'ivybridge.el7'
+
+-- current name and version
 local name = myModuleName()
 local version = myModuleVersion()
 local newline = '\\\n'
 
-local global_base_generic = '/storage/software/generic.el7'
-
+-- -- FUNCTION DEFINITIONS (main below) -- --
 -- l_easybuild user just need custom repo variables for eb-install tool
 local function setleasybuild()
     -- standard variables not necessary for global installation
@@ -92,6 +104,7 @@ local function setleasybuild()
     end
 end
 
+-- determining the hardware architecture
 local function getArch()
   -- distinguish different software stacks
   local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
@@ -113,6 +126,7 @@ local function getArch()
   return arch
 end
 
+-- function for defining variables for EasyBuild software installation
 local function varInstallSW(workspace)
   local wsSW = pathJoin(workspace, 'Software')
   local global_base = '/software.el7'
@@ -147,7 +161,7 @@ local function varInstallSW(workspace)
   setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(wsSW, 'generic.el7', 'modulefiles'))
 end
 
--- additional software locations like Python or R
+-- setting software locations for custom modules, Python, and R
 local function varUseSW(ws_dir)
   -- module paths
   prepend_path("MODULEPATH", pathJoin(ws_dir, 'modulefiles'))
@@ -170,6 +184,7 @@ local function varUseSW(ws_dir)
   prepend_path('R_LIBS', rpackpath)
 end
 
+-- setting Workspace variables
 local function generalVars(ws_dir, scr_dir)
   -- env vars
   setenv('WORKSPACE', ws_dir)
@@ -180,6 +195,7 @@ local function generalVars(ws_dir, scr_dir)
 
 end
 
+-- get directories for HOME
 local function homeDirs()
   local ws_path = pathJoin(os.getenv('HOME'))
   local user = os.getenv('USER')
@@ -190,16 +206,7 @@ local function homeDirs()
   return ws_path, scr_path
 end
 
-function file_check(file_name)
-  local file_found = io.open(file_name, "r")
-  if file_found == nil then
-    file_found = false
-  else
-    file_found = true
-  end
-  return file_found
-end
-
+-- get Workspace directories
 local function workspaceDirs(ws)
   -- vars
   local wsDir, rg, wsName = unpack(ws)
@@ -208,6 +215,7 @@ local function workspaceDirs(ws)
   return workspace, scr
 end
 
+-- set Workspace environment
 local function setWorkspace(ws)
   -- vars
   local wsDir, rg, wsName = unpack(ws)
@@ -235,6 +243,7 @@ local function setWorkspace(ws)
   end
 end
 
+-- check if Worspace with specific name is accessible
 local function WorkspaceAccess(ws)
   local code, out = subprocess('find '..ws..'/ -maxdepth 0 -type f -perm -g=rx')
   io.stderr:write('test dir: ', tostring(code), newline)
@@ -246,6 +255,7 @@ local function WorkspaceAccess(ws)
   return res
 end
 
+-- get the list of available Workspaces
 local function getWorkspaces(ws_name)
   if (ws_name == '' or ws_name == nil) then
     ws_name = '*'
@@ -268,10 +278,8 @@ local function getWorkspaces(ws_name)
   return ws_count, t
 end
 
-local function isempty(s)
-  return s == nil or s == ''
-end
-
+-- general function start searching for Workspaces
+-- handling cases of no, one, and multiple Workspaces
 local function findWS(ws_set)
   if ( not( isempty(ws_set) ) ) then
     -- selected workspace
@@ -323,7 +331,31 @@ local function findWS(ws_set)
   return nil
 end
 
--- main with determing the cases
+-- helper function for checking if file exists
+function file_check(file_name)
+  local file_found = io.open(file_name, "r")
+  if file_found == nil then
+    file_found = false
+  else
+    file_found = true
+  end
+  return file_found
+end
+-- helper function, test if variable is empty
+local function isempty(s)
+  return s == nil or s == ''
+end
+
+
+-- -- MAIN -- --
+-- dealing with different types of Workspace module
+
+-- the module can be debuged with ouput by creating a new debug version
+--   in one of the directories create `ln -s ../Workspace_tools/<version>.lua debug.lua`
+if version == "debug" then
+  LmodMessage('DEBUG: this is the debug version of '..name)
+end
+
 -- l_easybuild needs only variables for generic SW stack
 if (os.getenv('USER') == 'l_easybuild') then
   setleasybuild()
