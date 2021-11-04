@@ -93,8 +93,10 @@ local function setleasybuild()
     -- standard variables not necessary for global installation
     -- settings for generic software stack
     setenv('CUSTOM_GENERIC_EASYBUILD_PREFIX', global_base_generic)
-    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES', pathJoin(global_base_generic,
-'modulefiles'))
+    setenv('CUSTOM_GENERIC_EASYBUILD_INSTALLPATH_MODULES',
+            pathJoin(global_base_generic, 'modulefiles'))
+    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs',
+                'ubelix_hooks.py'))
     -- provide hooks
     --if ebver == nil then -- issues with installing
     --   LmodError('ERROR: please load module Easybuild before loading ' .. name .. '/' .. version )
@@ -134,10 +136,7 @@ local function varInstallSW(workspace)
 
   local arch = getArch()
 
-  ebver = os.getenv('EBVERSIONEASYBUILD')
-  if not (ebver == nil) then
-    setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
-  end
+  setenv('EASYBUILD_HOOKS', pathJoin('/storage/software/easyconfigs', 'ubelix_hooks.py'))
 
   -- Don't warn for this and Easybuild module during eb process
   modules = 'EasyBuild,' .. name
