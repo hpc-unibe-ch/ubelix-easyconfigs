@@ -88,6 +88,22 @@ local version = myModuleVersion()
 local newline = '\\\n'
 
 -- -- FUNCTION DEFINITIONS (main below) -- --
+
+-- helper function for checking if file exists
+function file_check(file_name)
+  local file_found = io.open(file_name, "r")
+  if file_found == nil then
+    file_found = false
+  else
+    file_found = true
+  end
+  return file_found
+end
+-- helper function, test if variable is empty
+local function isempty(s)
+  return s == nil or s == ''
+end
+
 -- l_easybuild user just need custom repo variables for eb-install tool
 local function setleasybuild()
     -- standard variables not necessary for global installation
@@ -329,22 +345,6 @@ local function findWS(ws_set)
   end
   return nil
 end
-
--- helper function for checking if file exists
-function file_check(file_name)
-  local file_found = io.open(file_name, "r")
-  if file_found == nil then
-    file_found = false
-  else
-    file_found = true
-  end
-  return file_found
-end
--- helper function, test if variable is empty
-local function isempty(s)
-  return s == nil or s == ''
-end
-
 
 -- -- MAIN -- --
 -- dealing with different types of Workspace module
