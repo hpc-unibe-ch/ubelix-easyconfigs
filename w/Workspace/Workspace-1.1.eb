@@ -338,7 +338,7 @@ local function findWS(ws_set)
           LmodMessage('There are no workspaces detected for you, ',
                       'if you already have one, please contact support.'..newline..
                       'If you want to use your $HOME instead, please load '..newline..
-                      '   '..'module load '..name..'/home')
+                      '   '..'module load '..name..'_Home')
           execute {cmd="module unload "..name,modeA={"load"}}
       end
     end
