@@ -40,6 +40,6 @@ dependencies = [
 # configopts = '--enable-mpi1-compatibility '
 
 # to enable SLURM integration (site-specific)
-configopts += '--with-slurm --with-pmi'
+configopts = '--with-slurm --with-pmi'
 
 moduleclass = 'mpi'
