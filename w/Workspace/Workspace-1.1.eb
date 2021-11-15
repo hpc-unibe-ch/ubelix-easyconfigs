@@ -38,7 +38,7 @@ Singularity:
 
 toolchain = SYSTEM
 sources = ['CustomRepo.tar.gz']
-checksums = ['99572f83ee7843ab6c3d2fba9413c65c0434da59f9a6b808abd02625ee1fb8cd']
+checksums = ['2708088e55ff842bab84927278a3b2aa7aed1219f6a6aae37af912538a28efc7']
 
 # create the actual Workspace module and additionally create modules for "software only" and "home", all of them are symlinks thus the one below is the only one to maintain.
 # TODO due to different directory structure of global and local SW stacks, you need to change the following first line when builing localy
