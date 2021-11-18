@@ -129,7 +129,8 @@ local function getArch()
   arch_typ = arch_typ:gsub(newline, "")
   local arch = ''
   if ( arch_typ == 'corei7-avx' or arch_typ == 'sandybridge') then
-        arch = 'sandybridge.el7'
+        -- arch = 'sandybridge.el7'
+        arch = 'ivybridge.el7'
   elseif ( arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
         arch = 'ivybridge.el7'
   elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
