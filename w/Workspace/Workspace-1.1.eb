@@ -125,23 +125,24 @@ end
 -- determining the hardware architecture
 local function getArch()
   -- distinguish different software stacks
-  local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
-  arch_typ = arch_typ:gsub(newline, "")
-  local arch = ''
-  if ( arch_typ == 'corei7-avx' or arch_typ == 'sandybridge') then
-        -- arch = 'sandybridge.el7'
-        arch = 'ivybridge.el7'
-  elseif ( arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
-        arch = 'ivybridge.el7'
-  elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
-        arch = 'broadwell.el7'
-  elseif (arch_typ == 'btver2' or arch_typ == 'znver1' or arch_typ == 'znver2' or arch_typ == 'znver3' or arch_typ == 'amd') then
-        arch = 'epyc2.el7'
-  else
-        LmodMessage('Warning: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' ..
-                  arch_typ .. ', please contact support. ')
-        arch = fallback_arch
-  end
+  --local arch_typ = subprocess("gcc -march=native -Q --help=target | grep '^ *-march' | awk '{print $2}'")
+  --arch_typ = arch_typ:gsub(newline, "")
+  --local arch = ''
+  --if ( arch_typ == 'corei7-avx' or arch_typ == 'sandybridge') then
+  --      -- arch = 'sandybridge.el7'
+  --      arch = 'ivybridge.el7'
+  --elseif ( arch_typ == 'core-avx-i' or arch_typ == 'ivybridge') then
+  --      arch = 'ivybridge.el7'
+  --elseif ( arch_typ == 'core-avx2' or arch_typ == 'broadwell') then
+  --      arch = 'broadwell.el7'
+  --elseif (arch_typ == 'btver2' or arch_typ == 'znver1' or arch_typ == 'znver2' or arch_typ == 'znver3' or arch_typ == 'amd') then
+  --      arch = 'epyc2.el7'
+  --else
+  --      LmodMessage('Warning: the module ' .. name .. '/' .. version .. ' has no definition for node architecture ' ..
+  --                arch_typ .. ', please contact support. ')
+  --      arch = fallback_arch
+  --end
+  local arch = subprocess('basename $(readlink -f /software.el7/)')
   return arch
 end
 
