@@ -5,7 +5,7 @@
 easyblock = 'Tarball'
 
 name = 'Workspace_tools'
-version = '1.1'
+version = '11'
 
 hidden = True
 
@@ -364,7 +364,6 @@ if (os.getenv('USER') == 'l_easybuild') then
 end
 
 WS_name = os.getenv(WS_VAR)
-unsetenv(WS_VAR)
 local ws_path = ''
 local scr_path = ''
 
@@ -388,29 +387,24 @@ elseif name == mod_name_sw_ro then
       return
     end
     local wsDir, rg, wsName = unpack(ws)
-    setenv(WS_SW_VAR, wsName)
     ws_path, scr_path = workspaceDirs(ws)
   end
+  execute{cmd="export "..WS_SW_VAR.."="..WS_name, modeA={"load"}}
 -- -- WORKSPACE
 elseif name == mod_name_ws then
-  if mode() == 'unload' then
-    WS_name = os.getenv(WS_VAR_LOAD)
-  end
-  -- if reload, we don't want to show list again
-  if mode() == 'load' and not(isempty(os.getenv(WS_VAR_LOAD))) then
-    return
-  end
-
   local ws = findWS(WS_name)
   if isempty(ws) then
     return
   end
+  -- for the purpuse of correct reload of the Workspace
+  ---- make the HPC_WORKSPACE variable persistent
+  execute{cmd="export "..WS_VAR.."="..WS_name, modeA={"load"}}
   local wsDir, rg, wsName = unpack(ws)
   setenv(WS_VAR_LOAD, wsName)
-
   -- prepare
   ws_path, scr_path = workspaceDirs(ws)
   setWorkspace(ws)
+
 -- -- Generic module
 elseif name == mod_name_generic then
   LmodMessage('This is a generic version, ',
