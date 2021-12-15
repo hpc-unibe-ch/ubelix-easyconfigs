@@ -396,10 +396,10 @@ elseif name == mod_name_ws then
   if isempty(ws) then
     return
   end
+  local wsDir, rg, wsName = unpack(ws)
   -- for the purpuse of correct reload of the Workspace
   ---- make the HPC_WORKSPACE variable persistent
-  execute{cmd="export "..WS_VAR.."="..WS_name, modeA={"load"}}
-  local wsDir, rg, wsName = unpack(ws)
+  execute{cmd="export "..WS_VAR.."="..wsName, modeA={"load"}}
   setenv(WS_VAR_LOAD, wsName)
   -- prepare
   ws_path, scr_path = workspaceDirs(ws)
