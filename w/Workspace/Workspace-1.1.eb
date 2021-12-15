@@ -5,7 +5,7 @@
 easyblock = 'Tarball'
 
 name = 'Workspace_tools'
-version = '11'
+version = '1.1'
 
 hidden = True
 
